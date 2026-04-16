@@ -1,0 +1,40 @@
+{
+  "name": "kayan-materials",
+  "version": "0.0.1",
+  "description": "Kayan Materials Management System - MVP",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run dev:server & npm run dev:client",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "npm run build:server && npm run build:client",
+    "build:server": "cd server && npm run build",
+    "build:client": "cd client && npm run build",
+    "build:all": "npm install && npm run install:client && npm run install:server && npm run build",
+    "install:client": "cd client && npm install",
+    "install:server": "cd server && npm install",
+    "install:all": "npm install && npm run install:client && npm run install:server",
+    "start": "cd server && npm run start",
+    "lint": "npm run lint:server && npm run lint:client",
+    "lint:server": "cd server && npm run lint 2>/dev/null || true",
+    "lint:client": "cd client && npm run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/kayan-materials.git"
+  },
+  "keywords": [
+    "materials",
+    "suppliers",
+    "transactions",
+    "inventory",
+    "management"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

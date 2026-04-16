@@ -1,0 +1,99 @@
+@import 'tailwindcss';
+
+@font-face {
+    font-family: test;
+    src: url('/src/assets/fonts/icomoon.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: Playfair;
+  src: url('/src/assets/fonts/Playfair-VariableFont_opsz\,wdth\,wght.ttf') format('TrueType');
+}
+
+@theme{
+    --animate-slide-in: slide-in 0.3s ease-in-out both;
+}
+
+@keyframes slide-in {
+    0% {
+        transform: translateY(-100%);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+body{
+    font-family: sans-serif;
+}
+
+.view_more::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    transition: all 0.3s ease-in-out;
+    z-index: -1;
+}
+
+.view_more:hover::before {
+    left: 0;
+}
+
+.rtl {
+    position: relative;
+    overflow: hidden;
+}
+.rtl::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: #071c1f;
+    transition: all 0.3s ease-in-out;
+    z-index: -1;
+}
+
+.rtl:hover::before {
+    right: 100%;
+    background: #FFB400;
+}
+
+.ltr {
+    position: relative;
+    overflow: hidden;
+}
+.ltr::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: all 0.3s ease-in-out;
+    z-index: -1;
+}
+
+.ltr:hover::before {
+    left: 100%;
+    background: #071c1f;
+}
+
+.swiper-slide img {
+    display: block;
+    width: 100%;
+    height: 100%; /* Or a specific height if needed */
+    object-fit: cover; /* For images to cover the area */
+}
+
+.swiper-container{
+    overflow: clip;
+}
+
+.swiper{
+    overflow: visible;
+}

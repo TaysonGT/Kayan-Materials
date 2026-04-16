@@ -1,0 +1,51 @@
+# Netlify Configuration for Full-Stack Kayan Materials
+# Supports both Client (React) and Server (Express) in single repo
+
+[build]
+  # Install dependencies for both client and server
+  command = "npm run install:all && npm run build:all"
+  # Publish the client dist folder
+  publish = "client/dist"
+
+# Development environment
+[context.development]
+  environment = { NODE_ENV = "development" }
+
+# Production environment  
+[context.production]
+  environment = { NODE_ENV = "production" }
+
+# Redirect all non-file requests to index.html (SPA)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  # Except API routes - let them hit the actual endpoints
+  conditions = { Rule = "!Path(/api/*)" }
+
+# API routing to backend
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# Rewrite root API calls without /api prefix to the function
+[[rewrites]]
+  from = "/materials*"
+  to = "/.netlify/functions/api/materials:splat"
+  status = 200
+
+[[rewrites]]
+  from = "/suppliers*"
+  to = "/.netlify/functions/api/suppliers:splat"
+  status = 200
+
+[[rewrites]]
+  from = "/supplier-materials*"
+  to = "/.netlify/functions/api/supplier-materials:splat"
+  status = 200
+
+[[rewrites]]
+  from = "/transactions*"
+  to = "/.netlify/functions/api/transactions:splat"
+  status = 200
