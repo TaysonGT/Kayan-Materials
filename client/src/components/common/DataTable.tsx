@@ -12,6 +12,7 @@ import {
   Typography
 } from '@mui/material'
 import { FiEdit, FiTrash2 } from 'react-icons/fi'
+import { Loader } from '../ui'
 
 interface Column {
   field: string
@@ -28,17 +29,28 @@ interface DataTableProps {
   onDelete?: (row: any) => void
   emptyMessage?: string
   rowsPerPage?: number
+  loading: boolean;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
   columns,
   rows,
+  loading,
   onEdit,
   onDelete,
   withAcitons=true,
   emptyMessage = 'لا توجد بيانات',
   rowsPerPage = 10
 }) => {
+  
+  if (loading) {
+    return (
+      <div className='w-full flex justify-center py-10'>
+          <Loader size={30} thickness={5}/>
+        </div>
+      )
+  }
+
   if (rows.length<1) {
     return (
       <Paper sx={{ p: 3, textAlign: 'center' }}>

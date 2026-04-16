@@ -251,6 +251,7 @@ const HomePage = () => {
           backgroundColor="#e3f2fd"
           textColor="#1976d2"
           captionColor="#1565c0"
+          loading={suppliersLoading}
         />
         <StatsCard
           value={materials.length}
@@ -258,6 +259,7 @@ const HomePage = () => {
           backgroundColor="#f3e5f5"
           textColor="#7b1fa2"
           captionColor="#6a1b9a"
+          loading={materialsLoading}
         />
         <StatsCard
           value={transactions.length}
@@ -265,6 +267,7 @@ const HomePage = () => {
           backgroundColor="#fff3e0"
           textColor="#f57c00"
           captionColor="#e65100"
+          loading={transactionsLoading}
         />
         <StatsCard
           value={
@@ -274,6 +277,7 @@ const HomePage = () => {
           backgroundColor="#e8f5e9"
           textColor="#388e3c"
           captionColor="#2e7d32"
+          loading={transactionsLoading}
         />
       </Box>
 

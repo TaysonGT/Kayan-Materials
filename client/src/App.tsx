@@ -22,11 +22,11 @@ const theme = createTheme({
   direction: 'rtl',
 })
 
-// Configure axios baseURL from environment variable
-// Development: uses Vite proxy (/..)
-// Production: uses deployed API endpoint
-const apiBaseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
-axios.defaults.baseURL = apiBaseURL
+// Configure axios
+// All API calls use /api prefix (see src/api/*.ts files)
+// Development: Vite proxy intercepts /api/* and forwards to backend
+// Production: Server/Netlify handles /api routing
+axios.defaults.baseURL = import.meta.env.DEV? 'http://localhost:5000': import.meta.env.VITE_BACKEND_URL || '/';
 
 function App() {
   useEffect(() => {

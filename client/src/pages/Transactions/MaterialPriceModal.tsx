@@ -33,10 +33,10 @@ interface Props {
 const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierCosts, getMaterialSupplierTransactions}) => {
     const [selectedSupplier, setSelectedSupplier] = useState<Supplier|undefined>()
     const [selectedMaterial, setSelectedMaterial] = useState<Material|undefined>()
-    const [isLoading, setIsLoading] = useState(false)
     const {suppliers} = useSuppliers()
     const [materials, setMaterials] = useState<Material[]>([])
     const [transactions, setTransactions] = useState<Transaction[]>([])
+    const [loading, setLoading] = useState(true)
     const [pagination, setPagination] = useState({ page: 1, limit: 10 })
     const [maxPages, setMaxPages] = useState(0)
     const [total, setTotal] = useState(0)
@@ -50,42 +50,42 @@ const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierC
     }|undefined>()
 
     const reset = ()=>{
-        setSelectedMaterial(undefined)
-        setSelectedSupplier(undefined)
-        setTransactions([])
-        setPagination({page:1, limit:10})
-        setCostInfo(undefined)
+      setSelectedMaterial(undefined)
+      setSelectedSupplier(undefined)
+      setTransactions([])
+      setPagination({page:1, limit:10})
+      setCostInfo(undefined)
     }
 
     const calculate = async()=>{
-        setIsLoading(true)
+        setLoading(true)
         if(!selectedMaterial||!selectedSupplier){
             toast.error('برجاء اختيار المورد والخام')
-            setIsLoading(false)
+            setLoading(false)
             reset()
             return
         };
         await getCosts()
         await getTransactions()
-        setIsLoading(false)
+        setLoading(false)
     }
 
     const getCosts = async()=> {
-        await getTransactions()
-        const data = await getMaterialSupplierCosts(selectedSupplier?.id||'', selectedMaterial?.id||'')
-        setCostInfo(data)   
+      await getTransactions()
+      const data = await getMaterialSupplierCosts(selectedSupplier?.id||'', selectedMaterial?.id||'')
+      setCostInfo(data)   
     }
     
     const getTransactions = async()=> {
-        if(!selectedMaterial||!selectedSupplier){
-            toast.error('برجاء اختيار المورد والخام')
-            setIsLoading(false)
-            return
-        };
-        const data = await getMaterialSupplierTransactions({supplierId: selectedSupplier.id, materialId: selectedMaterial.id, page: pagination.page, limit: pagination.limit})
-        setTransactions(data?.transactions||[])
-        setMaxPages(Math.ceil((data?.total || 0) / pagination.limit))
-        setTotal(data?.total || 0)
+      if(!selectedMaterial||!selectedSupplier){
+          toast.error('برجاء اختيار المورد والخام')
+          setLoading(false)
+          return
+      };
+      const data = await getMaterialSupplierTransactions({supplierId: selectedSupplier.id, materialId: selectedMaterial.id, page: pagination.page, limit: pagination.limit})
+      setTransactions(data?.transactions||[])
+      setMaxPages(Math.ceil((data?.total || 0) / pagination.limit))
+      setTotal(data?.total || 0)
     }
 
     const modifyPagination = (newPagination: Partial<typeof pagination>) => {
@@ -192,8 +192,8 @@ const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierC
         <DialogContent sx={{ pt: 8, display: 'flex', flexDirection: 'column'}}>
             <Box sx={{display:'flex', alignItems: 'start', pt:1, gap:2}}>
                 <FiltersBar filters={filters}/>
-                <Button onClick={calculate} variant="contained" size='large' disabled={isLoading}>
-                    {isLoading ? 'جاري...' : 'حساب'}
+                <Button onClick={calculate} variant="contained" size='large' disabled={loading}>
+                    {loading ? 'جاري...' : 'حساب'}
                 </Button>
                 <Button onClick={reset} variant="outlined" color='error' size='large'>
                     إعادة
@@ -206,6 +206,7 @@ const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierC
                 backgroundColor="#e3f2fd"
                 textColor="#1976d2"
                 captionColor="#1565c0"
+                loading={loading}
                 />
                 <StatsCard
                 value={formatCurrency(costInfo?.averageCost||0)}
@@ -213,6 +214,7 @@ const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierC
                 backgroundColor="#e8f5e9"
                 textColor="#388e3c"
                 captionColor="#2e7d32"
+                loading={loading}
                 />
                 <StatsCard
                 value={formatCurrency(costInfo?.materialTotal||0)}
@@ -220,6 +222,7 @@ const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierC
                 backgroundColor="#fff3e0"
                 textColor="#f57c00"
                 captionColor="#e65100"
+                loading={loading}
                 />
                 <StatsCard
                 value={formatCurrency(costInfo?.freightTotal||0)}
@@ -227,6 +230,7 @@ const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierC
                 backgroundColor="#f3e5f5"
                 textColor="#7b1fa2"
                 captionColor="#6a1b9a"
+                loading={loading}
                 />
                 
             </Box>
@@ -235,9 +239,10 @@ const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierC
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>الإجمالي: {total}</Typography>
             </Box>
             <DataTable
-                withAcitons={false}
-                columns={tableColumns}
-                rows={transactions}
+              withAcitons={false}
+              columns={tableColumns}
+              rows={transactions}
+              loading={loading}
             />
             <NavigationControl 
             maxPages={maxPages}

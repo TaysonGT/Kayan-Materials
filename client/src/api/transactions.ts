@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { Transaction, TRANSACTION_STATUS } from '../types';
 
-const API_URL = '/transactions';
+const API_URL = '/api/transactions';
 
 export const fetchTransactions = async (params?: {page?: number, limit?: number, materialId?: string, supplierId?: string, status?: TRANSACTION_STATUS}): Promise<{transactions?: Transaction[], success:boolean, message: string, total: number, limit: number, page: number}> => {
   const response = await axios.get(API_URL, { params });

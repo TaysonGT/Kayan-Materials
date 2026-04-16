@@ -70,17 +70,19 @@ Backend: Express server on its own port
 
 ---
 
-## API Communication: Proxying vs Localhost
+## API Communication: /api Prefix Routing
 
 ### Current Setup (Development)
-Your project uses **relative API paths** which is perfect:
+All API endpoints are prefixed with `/api/` for security and organization:
 ```typescript
-// Good ✅ - uses relative paths
-const API_URL = '/materials'
-axios.get(`/suppliers`)
-```
+// Client API files use /api prefix
+const API_URL = '/api/materials'
+axios.get(`/api/suppliers`)
 
-This allows **automatic proxying** - no CORS needed!
+// Server routes are also prefixed with /api
+app.use('/api/materials', materialRouter)
+app.use('/api/suppliers', supplierRouter)
+```
 
 ### How It Works
 
@@ -88,66 +90,60 @@ This allows **automatic proxying** - no CORS needed!
 ```
 Browser → http://localhost:5173 (Vite)
            ↓ (proxy rule in vite.config.ts)
-           → http://localhost:5000 (Express)
+           ↓ Intercepts /api/* and rewrites to /materials, /suppliers
+           → http://localhost:5000 (Express backend)
 ```
 
-**Setup needed in `vite.config.ts`:**
+**Vite proxy configuration:**
 ```typescript
-export default defineConfig({
-  server: {
-    proxy: {
-      '/materials': 'http://localhost:5000',
-      '/suppliers': 'http://localhost:5000',
-      '/transactions': 'http://localhost:5000',
-      '/supplier-materials': 'http://localhost:5000',
-    }
+proxy: {
+  '/api': {
+    target: 'http://localhost:5000',
+    rewrite: (path) => path.replace(/^\/api/, ''),
   }
-})
+}
 ```
 
-#### Production (Netlify)
+This means:
+- Client requests: `/api/materials` → 
+- Vite proxy removes `/api` → 
+- Backend receives: `/materials` 
+- Server route handles: `app.use('/api/materials', ...)`
+
+#### Production (Backend Service)
 ```
-Browser → https://yourdomain.netlify.app (CDN)
-           ↓ (netlify.toml rewrites)
-           → Backend API function/server
+Browser → https://yourdomain.com (CDN)
+           ↓ requests to /api/*
+           → Reverse proxy or routing layer
+           → Backend server handles /api routes
 ```
 
-**NO CORS issues** because requests stay on same domain!
+### Benefits of /api Prefix
+✅ **Security**: Clear separation - prevents accidental direct API access
+✅ **Organization**: All API logic under namespace
+✅ **Flexibility**: Easy to route differently in different environments
+✅ **Versioning**: Can easily support `/api/v2/` in future
+✅ **Middleware**: Apply auth/logging to all `/api` routes centrally
 
-### Flexible Development Without Changing Code
-
-**Development (.env):**
-```
-VITE_API_BASE_URL=/api  # Relative - uses proxy
-```
-
-**Production (.env.production):**
-```
-VITE_API_BASE_URL=https://api.yourdomain.com  # Can point anywhere
-```
-
-The `import.meta.env.VITE_API_BASE_URL` in your client code will use the appropriate value.
+### No Code Changes Needed
+All API endpoints automatically use `/api/` prefix because:
+1. Client API files hardcode `/api/materials`, `/api/suppliers`, etc.
+2. Server routes all prefixed with `app.use('/api/...', ...)`
+3. They're automatically synchronized in both dev and production!
 
 ---
 
 ## Database Persistence Strategy
 
-### Current: SQLite (Development)
+### Current: MySQL (Your Configuration)
+Database connection is configured via environment variables:
+```env
+DATABASE_HOST=your-mysql-host
+DATABASE_PORT=3306
+DATABASE_NAME=kayan
+DATABASE_USERNAME=user
+DATABASE_PASSWORD=password
 ```
-❌ SQLite doesn't work on Netlify (no persistent filesystem)
-   Files are deleted after function execution
-```
-
-### For Production: Choose One
-
-#### Option A: Cloud PostgreSQL (Recommended)
-```
-Providers: Neon, Supabase, Railway, Render
-NPM: npm install pg
-Benefits: Scalable, backed up, can use existing TypeORM code
-```
-
-#### Option B: Keep SQLite Local (Development Only)
 ```
 Use TypeORM with conditional setup:
   Development → SQLite (local file)
@@ -169,24 +165,49 @@ Still requires cloud database for production
 ```env
 # Core Settings
 PORT=5000
-NODE_ENV=production
+NODE_ENV=development  # development or production
 
-# Database
-DATABASE_PATH=./database/db.sqlite  # Local dev only
-DATABASE_URL=postgresql://...       # Production only
+# MySQL Database Configuration
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+DATABASE_NAME=kayan
+DATABASE_USERNAME=root
+DATABASE_PASSWORD=yourpassword
 
-# CORS
-FRONTEND_URL=https://kayan-materials.netlify.app
+# CORS Configuration
+FRONTEND_URL=http://localhost:5173  # or production domain
+
+# API Routing
+# All backend routes are under /api prefix
+# /api/materials, /api/suppliers, /api/transactions, /api/supplier-materials
 ```
 
-### Client (.env.production)
+### Client (.env)
 
 ```env
-# API Endpoint - can be different from frontend URL
-VITE_API_BASE_URL=https://api.yourdomain.com
+# API endpoints use /api prefix
+# No VITE_API_BASE_URL needed - axios uses relative paths
+# Development: Vite proxy handles /api routing
+# Production: Server/reverse proxy handles /api routing
 
-# Or same domain (if using reverse proxy)
-VITE_API_BASE_URL=/api
+# Example API calls:
+# GET /api/materials
+# POST /api/suppliers
+# DELETE /api/transactions/:id
+```
+
+### Example Production Setup
+
+**Server Environment (Railway/Render/DigitalOcean):**
+```env
+PORT=5000
+NODE_ENV=production
+DATABASE_HOST=mysql.example.com
+DATABASE_PORT=3306
+DATABASE_NAME=kayan_prod
+DATABASE_USERNAME=kayan_user
+DATABASE_PASSWORD=secure_password_here
+FRONTEND_URL=https://yourdomain.com
 ```
 
 ---
@@ -195,38 +216,47 @@ VITE_API_BASE_URL=/api
 
 ### Development
 ```bash
-# Terminal 1: Start backend
+# Terminal 1: Start backend (port 5000)
 cd server
 npm run dev
 
-# Terminal 2: Start frontend with proxy
+# Terminal 2: Start frontend (port 5173) with Vite proxy
 cd client
 npm run dev
+
+# Or run both together:
+npm run dev  # from root
 ```
 
 ### Production Build
 ```bash
-# Root level
+# Build both applications
 npm run build:all
-npm run start:server
 
-# Or in Netlify/Railway: uses npm start scripts
+# Start server only (client is built as static files)
+npm run start
 ```
 
 ---
 
 ## Known Issues to Fix Before Deploying
 
-### 🔴 Critical
-1. **Axios baseURL hardcoded** → Use environment variable
-2. **Server port hardcoded** → Use `process.env.PORT`
-3. **Database path hardcoded** → Use `process.env.DATABASE_PATH`
-4. **Frontend URL in CORS** → Use environment variable
+### ✅ Already Configured
+1. ✅ **API Prefix**: All endpoints use `/api` prefix for security
+2. ✅ **Environment Variables**: Server port, DB connection, CORS configurable
+3. ✅ **Vite Proxy**: Development proxy handles `/api` requests
+4. ✅ **axios**: No hardcoded baseURL
 
-### 🟡 Important
-1. No `.env` configuration system
-2. No production database configured
-3. SQLite won't persist on serverless platforms
+### 🔴 Still Need Before Production
+1. **Database Connection**: Update MySQL credentials in `.env`
+2. **CORS Domain**: Set `FRONTEND_URL` to your production domain
+3. **Node Environment**: Ensure `NODE_ENV=production` for production builds
+
+### 🟡 Recommended Before Deploy
+1. Set up cloud MySQL database (if not using local)
+2. Configure automated backups for database
+3. Set up error tracking (Sentry) for production
+4. Enable request logging for debugging
 
 ---
 
@@ -297,17 +327,27 @@ npm run serve:all  # If implemented
 
 ## Troubleshooting
 
-### "API calls hitting localhost in production"
-→ Check `VITE_API_BASE_URL` environment variable
+### "API returns 404"
+→ Check that routes are prefixed with `/api` on backend
+→ Verify client API files use `/api` prefix
 
-### "CORS errors"
-→ Verify `FRONTEND_URL` environment variable matches deployed domain
+### "CORS errors in production"
+→ Verify `FRONTEND_URL` environment variable matches your domain exactly
+→ Check that backend CORS middleware is properly configured
 
-### "Database not persisting"
-→ SQLite doesn't work on Netlify Functions. Use cloud database.
+### "Development API calls fail"
+→ Check Vite proxy is rewriting `/api` correctly
+→ Verify backend is running on correct port
+→ Check browser console for actual request URLs
+
+### "Database connection fails"
+→ Verify MySQL credentials in `.env`
+→ Check database host/port are accessible
+→ Ensure database and user exist on MySQL server
 
 ### "Build fails"
-→ Check `npm run build:all` logs in Netlify UI
+→ Run `npm run build:client` and `npm run build:server` separately to isolate error
+→ Check `npm run build:all` logs for specific failures
 
 ---
 

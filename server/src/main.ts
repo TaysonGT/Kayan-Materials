@@ -16,7 +16,7 @@ dotenv.config();
 const app = express()
 
 // Configure port and environment
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || '5000';
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
@@ -38,19 +38,21 @@ app.use(express.urlencoded({
     extended: true
 }))
 
-// Routes
-// app.use('/auth', authRouter)
+// Routes - all API routes prefixed with /api for clear separation
+const API_PREFIX = '/api'
+
+// app.use(`/auth`, authRouter)
 // app.use(auth)
-app.use('/materials', materialRouter)
-app.use('/suppliers', supplierRouter)
-app.use('/supplier-materials', supplierMaterialRouter)
-app.use('/transactions', transactionRouter)
+app.use(`${API_PREFIX}/materials`, materialRouter)
+app.use(`${API_PREFIX}/suppliers`, supplierRouter)
+app.use(`${API_PREFIX}/supplier-materials`, supplierMaterialRouter)
+app.use(`${API_PREFIX}/transactions`, transactionRouter)
 
 // Server Running
 myDataSource
 .initialize() 
 .then(()=>{
-    app.listen(PORT, () => {
+    app.listen(parseInt(PORT),'0.0.0.0', () => {
         console.log(`Server running at http://localhost:${PORT}`);
         console.log(`Environment: ${NODE_ENV}`);
         console.log(`CORS Origin: ${allowedOrigins}`);

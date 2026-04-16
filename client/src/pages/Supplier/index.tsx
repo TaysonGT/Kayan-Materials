@@ -10,7 +10,7 @@ import NavigationControl from '../../components/ui/NavigationControl'
 import SupplierMaterialsTable from './SupplierMaterialsTable'
 
 const SuppliersPage = () => {
-  const { suppliers, pagination, maxPages, modifyPagination, addSupplier, updateSupplier, removeSupplier, refetchSuppliers } = useSuppliers()
+  const { suppliers, loading, pagination, maxPages, modifyPagination, addSupplier, updateSupplier, removeSupplier, refetchSuppliers } = useSuppliers()
   const [openDialog, setOpenDialog] = useState(false)
   const [showAddMaterialToSupplierDialog, setShowAddMaterialToSupplierDialog] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -135,6 +135,7 @@ const SuppliersPage = () => {
         rows={suppliers}
         onEdit={handleOpenDialog}
         onDelete={handleDelete}
+        loading={loading}
       />
 
       <FormDialog

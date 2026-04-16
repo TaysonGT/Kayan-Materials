@@ -6,24 +6,16 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    // Proxy API calls to backend server in development
-    proxy: {
-      '/materials': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      },
-      '/suppliers': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      },
-      '/supplier-materials': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      },
-      '/transactions': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      },
-    },
+    // Proxy all /api requests to backend server in development
+    // This allows client calls to /api/* without CORS issues during development
+    // proxy: {
+    //   '/': {
+    //     target: 'http://localhost:5000',
+    //     // changeOrigin: true,
+    //     // Remove the /api prefix when forwarding to backend
+    //     // so /api/materials becomes /materials on the backend
+    //     rewrite: (path) => path.replace(/^\/api/, ''),
+    //   },
+    // },
   },
 })

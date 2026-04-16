@@ -1,7 +1,7 @@
 import axios from 'axios'
 import type { Material, Supplier } from '../types'
 
-const API_URL = '/materials'
+const API_URL = '/api/materials'
 
 export const fetchMaterials = async (page= 1, limit=10): Promise<{ materials: Material[], success: boolean, message?: string, total: number, limit: number, page: number }> => {
   const response = await axios.get(API_URL, { params: { page, limit } })

@@ -1,15 +1,18 @@
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
+// import {readFileSync} from 'fs'
 
 dotenv.config();
 
-const databasePath = process.env.DATABASE_PATH || __dirname + '/../../database/db.sqlite';
-
 export const myDataSource = new DataSource({
-    type: "better-sqlite3",
-    database: databasePath,
+    type: "mysql",
+    host: process.env.DATABASE_HOST,
+    port: parseInt(process.env.DATABASE_PORT||'21756'),
+    database: process.env.DATABASE_NAME,
+    username: process.env.DATABASE_USERNAME,
+    password: process.env.DATABASE_PASSWORD,
     entities: [__dirname + "/entity/*.{js,ts}"],
-    synchronize: true,
+    synchronize: process.env.NODE_ENV ==='production'? false: true,
     subscribers: [],
-    migrations: []
+    migrations: [],
 })

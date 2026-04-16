@@ -10,7 +10,7 @@ import NavigationControl from '../../components/ui/NavigationControl'
 import MaterialSuppliersTable from './MaterialSuppliersTable'
 
 const MaterialsPage = () => {
-  const { materials, pagination, modifyPagination, maxPages, addMaterial, updateMaterial, removeMaterial, refetchMaterials } = useMaterials()
+  const { materials, loading, pagination, modifyPagination, maxPages, addMaterial, updateMaterial, removeMaterial, refetchMaterials } = useMaterials()
   const [openDialog, setOpenDialog] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
@@ -128,6 +128,7 @@ const MaterialsPage = () => {
         columns={tableColumns}
         rows={materials}
         onEdit={handleOpenDialog}
+        loading={loading}
         onDelete={handleDelete}
       />
 

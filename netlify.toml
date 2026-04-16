@@ -7,6 +7,10 @@
   # Publish the client dist folder
   publish = "client/dist"
 
+[build.environment]
+  NODE_ENV = "development"  # Forces npm to install devDependencies
+  NPM_CONFIG_PRODUCTION = "false"  # Explicitly disable production-only install
+
 # Development environment
 [context.development]
   environment = { NODE_ENV = "development" }
@@ -15,37 +19,20 @@
 [context.production]
   environment = { NODE_ENV = "production" }
 
-# Redirect all non-file requests to index.html (SPA)
+# Only serve static files and index.html for SPA routes
+# API routes (under /api prefix) must be handled by backend service
+# NOTE: Netlify Functions approach requires serverless functions
+# For better reliability, deploy backend separately to Railway/Render
+
+# Rewrite SPA routes to index.html (except /api/*)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  # Except API routes - let them hit the actual endpoints
   conditions = { Rule = "!Path(/api/*)" }
 
-# API routing to backend
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
+  to = "http://noel.hidencloud.com:24704/api/:splat"
   status = 200
-
-# Rewrite root API calls without /api prefix to the function
-[[rewrites]]
-  from = "/materials*"
-  to = "/.netlify/functions/api/materials:splat"
-  status = 200
-
-[[rewrites]]
-  from = "/suppliers*"
-  to = "/.netlify/functions/api/suppliers:splat"
-  status = 200
-
-[[rewrites]]
-  from = "/supplier-materials*"
-  to = "/.netlify/functions/api/supplier-materials:splat"
-  status = 200
-
-[[rewrites]]
-  from = "/transactions*"
-  to = "/.netlify/functions/api/transactions:splat"
-  status = 200
+  force = true

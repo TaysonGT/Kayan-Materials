@@ -11,7 +11,7 @@ export const useTransactions = () => {
   const [pagination, setPagination] = useState({ page: 1, limit: 10 })
   const [maxPages, setMaxPages] = useState(0)
   const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [detailedCosts, setDetailedCosts] = useState({total:0, materialCost: 0, supplierCost: 0, receivedCosts: 0, notReceivedCosts: 0})
 
   const refetchTransactions = async () => {

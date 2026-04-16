@@ -15,7 +15,7 @@ import { FiEye } from 'react-icons/fi'
 import MaterialPriceModal from './MaterialPriceModal'
 
 const TransactionsPage = () => {
-  const { transactions, getSupplierMaterialCosts, getSupplierMaterialTransactions, detailedCosts, refetchTransactions, statusFilter, materialFilter, supplierFilter, setSupplierFilter, setMaterialFilter, setStatusFilter, pagination, modifyPagination, maxPages, deleteTransaction} = useTransactions()
+  const { transactions, loading, getSupplierMaterialCosts, getSupplierMaterialTransactions, detailedCosts, refetchTransactions, statusFilter, materialFilter, supplierFilter, setSupplierFilter, setMaterialFilter, setStatusFilter, pagination, modifyPagination, maxPages, deleteTransaction} = useTransactions()
   const { suppliers } = useSuppliers()
   const { materials } = useMaterials()
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -142,6 +142,7 @@ const TransactionsPage = () => {
           backgroundColor="#e8f5e9"
           textColor="#388e3c"
           captionColor="#2e7d32"
+          loading={loading}
         />
         <StatsCard
           value={formatCurrency(detailedCosts.notReceivedCosts)}
@@ -149,6 +150,7 @@ const TransactionsPage = () => {
           backgroundColor="#fff3e0"
           textColor="#f57c00"
           captionColor="#e65100"
+          loading={loading}
         />
         <StatsCard
           value={transactions.length}
@@ -156,6 +158,7 @@ const TransactionsPage = () => {
           backgroundColor="#f3e5f5"
           textColor="#7b1fa2"
           captionColor="#6a1b9a"
+          loading={loading}
         />
         <StatsCard
           value={transactions.filter(i => i.status==='pending').length}
@@ -163,6 +166,7 @@ const TransactionsPage = () => {
           backgroundColor="#e3f2fd"
           textColor="#1976d2"
           captionColor="#1565c0"
+          loading={loading}
         />
       </Box>
       
@@ -183,6 +187,7 @@ const TransactionsPage = () => {
       <DataTable
         columns={tableColumns}
         rows={transactions}
+        loading={loading}
         onEdit={(transaction: Transaction)=>{setSelectedEdit(transaction);setShowEditDialog(true)}}
         onDelete={handleDelete}
       />
