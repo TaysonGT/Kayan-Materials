@@ -32,13 +32,3 @@ export const getMaterialsBySupplierId = async (id: string): Promise<{materials?:
   const response = await axios.get(`${API_URL}/${id}/materials`);
   return response.data;
 }
-
-export const addMaterialToSupplier = async (supplierId: string, materialId: string): Promise<{success:boolean, message?:string}> => {
-  const response = await axios.post(`/supplier-materials/${supplierId}/${materialId}`);
-  return response.data;
-}
-
-export const removeSupplierMaterialRelation = async (supplierId: string, materialId: string): Promise<{success:boolean, message?:string}> => {
-  const response = await axios.delete(`/supplier-materials/${supplierId}/${materialId}`);
-  return response.data;
-}

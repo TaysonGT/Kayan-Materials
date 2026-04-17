@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { Supplier } from '../types'
-import { addMaterialToSupplier, createSupplier, deleteSupplier, fetchSuppliers, getMaterialsBySupplierId, getSupplierById, patchSupplier, removeSupplierMaterialRelation } from '../api/suppliers'
+import { createSupplier, deleteSupplier, fetchSuppliers, getMaterialsBySupplierId, getSupplierById, patchSupplier } from '../api/suppliers'
 import { toast } from 'react-toastify'
+import { addMaterialToSupplier, removeSupplierMaterialRelation } from '../api/supplier-materials'
 
 export const useSuppliers = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
@@ -78,8 +79,6 @@ export const useSuppliers = () => {
     }
     return materials;
   }
-  // const getNextId = () => generateNextId(suppliers)
-
 
   const addSupplierMaterial = async(supplierId: string, materialId: string) => {
     const {success, message} = await addMaterialToSupplier(supplierId, materialId)

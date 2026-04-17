@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Material } from '../types'
 import { createMaterial, deleteMaterial, fetchMaterials, getMaterialById, getSuppliersByMaterialId, patchMaterial } from '../api/materials'
 import { toast } from 'react-toastify'
-import { addMaterialToSupplier, removeSupplierMaterialRelation } from '../api/suppliers'
+import { addMaterialToSupplier, removeSupplierMaterialRelation } from '../api/supplier-materials'
 
 export const useMaterials = () => {
   const [materials, setMaterials] = useState<Material[]>([])

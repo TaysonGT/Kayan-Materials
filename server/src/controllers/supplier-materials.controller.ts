@@ -18,12 +18,7 @@ const getSupplierMaterials = async (req:Request, res:Response)=>{
         return;
     }
 
-    if(supplier.materials&&supplier.materials.length<1) {
-        res.json({message: "هذا المورد لا يورد أي مواد خام حاليا", success: false})
-        return;
-    }
-
-    res.json({materials: supplier.materials, success: true, message: "تم جلب المواد الخام الخاصة بالمورد بنجاح"})
+    res.json({materials: supplier.materials||[], success: true, message: "تم جلب المواد الخام الخاصة بالمورد بنجاح"})
 }
 
 const getMaterialSuppliers = async (req:Request, res:Response)=>{
