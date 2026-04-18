@@ -33,12 +33,6 @@ const getMaterialSuppliers = async (req:Request, res:Response)=>{
         return;
     }
 
-    
-    if(material.suppliers&&material.suppliers.length<1) {
-        res.json({message: "هذا المورد لا يورد أية خامات حاليا", success: false})
-        return;
-    }
-
     res.json({suppliers: material.suppliers, success: true, message: "تم جلب الموردين الذين يوردون هذه الخامة بنجاح"})
     return;
 }
