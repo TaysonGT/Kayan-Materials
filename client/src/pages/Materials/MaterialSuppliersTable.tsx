@@ -26,7 +26,7 @@ const MaterialSuppliersTable:React.FC<Props> = ({material, show, hide, onAdd}) =
 
     useEffect(()=>{
       fetchSuppliers()
-    },[material, getMaterialSuppliers])
+    },[material])
 
   return (
   <>
