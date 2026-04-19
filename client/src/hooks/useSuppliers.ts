@@ -4,16 +4,16 @@ import { createSupplier, deleteSupplier, fetchSuppliers, getMaterialsBySupplierI
 import { toast } from 'react-toastify'
 import { addMaterialToSupplier, removeSupplierMaterialRelation } from '../api/supplier-materials'
 
-export const useSuppliers = () => {
+export const useSuppliers = (all?:boolean) => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [pagination, setPagination] = useState({ page: 1, limit: 10 })
   const [maxPages, setMaxPages] = useState(0)
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
 
-  const refetchSuppliers = async () => {
+  const refetchSuppliers = async (all?:boolean) => {
     setLoading(true)
-    const {suppliers, success, total:suppliersTotal} = await fetchSuppliers(pagination.page, pagination.limit)
+    const {suppliers, success, total:suppliersTotal} = await fetchSuppliers(all?1:pagination.page, all?200:pagination.limit)
     if(!success){
       toast.error('Failed to fetch suppliers')
       return
@@ -29,7 +29,7 @@ export const useSuppliers = () => {
   }
 
   useEffect(()=>{
-    refetchSuppliers()
+    refetchSuppliers(all)
   },[pagination])
 
   const addSupplier = async(supplier: Omit<Supplier, 'id'>) => {

@@ -13,7 +13,7 @@ interface Props{
 }
 
 const CreateTransactionForm:React.FC<Props> = ({show, hide, onSave}) => {
-    const { suppliers, getSupplierMaterials} = useSuppliers()
+    const { suppliers, getSupplierMaterials} = useSuppliers(true)
     const { refetchTransactions, addTransaction } = useTransactions()
     const [materials, setMaterials] = useState<Material[]>([])
 
