@@ -26,6 +26,7 @@ export interface Transaction {
   type: 'freight' | 'material'
   status: TRANSACTION_STATUS
   date: string
+  total?: number
 }
 
 // Common Types

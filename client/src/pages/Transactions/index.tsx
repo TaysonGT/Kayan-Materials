@@ -96,8 +96,7 @@ const TransactionsPage = () => {
     {
       field: 'quantity',
       label: 'الكمية',
-      align: 'center' as const
-,
+      align: 'center' as const,
       render: (value: any) => value ? value : '-'
     },
     { 
@@ -121,6 +120,12 @@ const TransactionsPage = () => {
           size="small"
         />
       ),
+      align: 'center' as const
+    },
+    {
+      field: 'total',
+      label: 'الإجمالي',
+      render: (value: any) => value?formatCurrency (value):'-',
       align: 'center' as const
     }
   ]
@@ -171,15 +176,12 @@ const TransactionsPage = () => {
       </Box>
       
       <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'start'}}>
-        <FiltersBar
-          filters={filters}
-        />
+        <FiltersBar filters={filters}/>
         <Button
           dir='ltr'
           variant="contained"
           startIcon={<FiEye />}
-          onClick={()=>setShowMaterialCostModal(true)}
-        >
+          onClick={()=>setShowMaterialCostModal(true)}>
           متوسط سعر الخام
         </Button>
       </Box>
@@ -188,7 +190,9 @@ const TransactionsPage = () => {
         columns={tableColumns}
         rows={transactions}
         loading={loading}
-        onEdit={(transaction: Transaction)=>{setSelectedEdit(transaction);setShowEditDialog(true)}}
+        onEdit={(transaction: Transaction)=>{
+          setSelectedEdit(transaction);
+          setShowEditDialog(true)}}
         onDelete={handleDelete}
       />
 

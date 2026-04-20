@@ -9,6 +9,10 @@ const materialRepo = myDataSource.getRepository(Material)
 const supplierRepo = myDataSource.getRepository(Supplier)
 const transactionRepo = myDataSource.getRepository(Transaction)
 
+const transactionWithTotal = (transaction: Transaction)=>{
+    return {...transaction, total: transaction.quantity*transaction.unitPrice}
+}
+
 const createTransaction = async (req: Request, res: Response) => {
     const { materialId, supplierId, unitPrice, type, date, status, quantity } = req.body;
 
@@ -49,7 +53,7 @@ const createTransaction = async (req: Request, res: Response) => {
     }
 
     await transactionRepo.save(transaction);
-    res.json({ transaction, message: "تم إنشاء الحركة بنجاح", success: true });
+    res.json({ transaction: transactionWithTotal(transaction), message: "تم إنشاء الحركة بنجاح", success: true });
 }
 
 const updateTransaction = async (req: Request, res: Response) => {
@@ -89,7 +93,7 @@ const updateTransaction = async (req: Request, res: Response) => {
     
 
     await transactionRepo.save(transaction);
-    res.json({ transaction, message: "تم تحديث الحركة بنجاح", success: true });
+    res.json({ transaction: transactionWithTotal(transaction), message: "تم تحديث الحركة بنجاح", success: true });
 }
 
 const getTransaction = async (req: Request, res: Response) => {
@@ -100,7 +104,7 @@ const getTransaction = async (req: Request, res: Response) => {
         res.json({ message: "الحركة غير موجودة", success: false });
         return;
     }
-    res.json({ transaction, message: "تم جلب الحركة بنجاح", success: true });
+    res.json({ transaction: transactionWithTotal(transaction), message: "تم جلب الحركة بنجاح", success: true });
 }
 
 const deleteTransaction = async (req: Request, res: Response) => {
@@ -131,7 +135,7 @@ const allTransactions = async (req: Request, res: Response) => {
     .take(parseInt(limit as string))
     .getManyAndCount();
 
-    res.json({ transactions, total, page, limit, message: "تم جلب الحركات بنجاح", success: true });
+    res.json({ transactions: transactions.map(t=>transactionWithTotal(t)), total, page, limit, message: "تم جلب الحركات بنجاح", success: true });
 }
 
 const allٍSupplierMaterialTransactions = async (req: Request, res: Response) => {
@@ -153,7 +157,7 @@ const allٍSupplierMaterialTransactions = async (req: Request, res: Response) =>
     .take(parseInt(limit as string))
     .getManyAndCount();
 
-    res.json({ transactions, total, page, limit, message: "تم جلب الحركات بنجاح", success: true });
+    res.json({ transactions: transactions.map(t=>transactionWithTotal(t)), total, page, limit, message: "تم جلب الحركات بنجاح", success: true });
 }
 
 const getTransactionsBySupplierId = async (req: Request, res: Response) => {
@@ -165,7 +169,7 @@ const getTransactionsBySupplierId = async (req: Request, res: Response) => {
     .orderBy('transactions.date', 'DESC')
     .getMany()
     
-    res.json({ transactions, message: "تم جلب الحركات بنجاح", success: true });
+    res.json({ transactions: transactions.map(t=>transactionWithTotal(t)), message: "تم جلب الحركات بنجاح", success: true });
 }
 
 const getTransactionsByMaterialId = async (req: Request, res: Response) => {
@@ -177,7 +181,7 @@ const getTransactionsByMaterialId = async (req: Request, res: Response) => {
     .orderBy('transactions.date', 'DESC')
     .getMany()
 
-    res.json({ transactions, message: "تم جلب الحركات بنجاح", success: true });
+    res.json({ transactions: transactions.map(t=>transactionWithTotal(t)), message: "تم جلب الحركات بنجاح", success: true });
 }
 
 const getDetailedCosts = async (req: Request, res: Response) => {

@@ -215,7 +215,7 @@ const HomePage = () => {
                   </TableCell>
                   <TableCell sx={{textAlign: 'center'}}>{row.quantity.toLocaleString('ar-EG')}</TableCell>
                   <TableCell sx={{textAlign: 'center'}}>{formatCurrency(row.unitPrice)}</TableCell>
-                  <TableCell sx={{textAlign: 'center'}}>{formatCurrency(row.quantity*row.unitPrice)}</TableCell>
+                  <TableCell sx={{textAlign: 'center'}}>{formatCurrency(row.total||0)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -246,7 +246,7 @@ const HomePage = () => {
       {/* Stats Overview */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 3, mb: 4 }}>
         <StatsCard
-          value={suppliers.length}
+          value={suppliersTotal}
           label="الموردون"
           backgroundColor="#e3f2fd"
           textColor="#1976d2"
@@ -254,7 +254,7 @@ const HomePage = () => {
           loading={suppliersLoading}
         />
         <StatsCard
-          value={materials.length}
+          value={materialsTotal}
           label="المواد"
           backgroundColor="#f3e5f5"
           textColor="#7b1fa2"
@@ -262,7 +262,7 @@ const HomePage = () => {
           loading={materialsLoading}
         />
         <StatsCard
-          value={transactions.length}
+          value={transactionsTotal}
           label="الفواتير"
           backgroundColor="#fff3e0"
           textColor="#f57c00"

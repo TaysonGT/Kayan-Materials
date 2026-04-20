@@ -16,15 +16,15 @@ export class Transaction{
     @Column()
     unitPrice: number;
 
-    @Column({nullable: true})
-    quantity?: number;
+    @Column({default: 1})
+    quantity: number;
 
     @Column({default: 'received'})
     status: 'received'|'pending';
 
     @Column()
     type: 'freight'|'material';
-
+    
     @Column()
     date: Date;
 
