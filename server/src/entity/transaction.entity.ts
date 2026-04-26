@@ -12,7 +12,9 @@ export class Transaction{
     @ManyToOne(()=>Material, (material)=>material.transactions)
     material: Material;
 
-    @ManyToOne(()=>Invoice, (invoice)=>invoice.transactions)
+    @ManyToOne(()=>Invoice, (invoice)=>invoice.transactions, {
+        onDelete: 'CASCADE'   // ✅ Correct placement
+    })
     invoice: Invoice;
     
     @Column()
