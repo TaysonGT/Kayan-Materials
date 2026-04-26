@@ -13,7 +13,7 @@ interface Props{
 
 const MaterialSuppliersTable:React.FC<Props> = ({material, show, hide, onAdd}) => {
     const [suppliers, setSuppliers] = useState(material?.suppliers||[])
-    const {getMaterialSuppliers, removeSupplierFromMaterial} = useMaterials()
+    const {getMaterialSuppliers, removeSupplierFromMaterial} = useMaterials({all:false})
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
     const [deleteId, setDeleteId] = useState('')
 

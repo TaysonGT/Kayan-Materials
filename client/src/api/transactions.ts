@@ -3,6 +3,11 @@ import type { Transaction, TRANSACTION_STATUS } from '../types';
 
 const API_URL = '/api/transactions';
 
+export interface TransactionPayload extends Omit<Transaction,'id'|'material'|'invoice'> {
+  materialId: string,
+  invoiceId: string
+}
+
 export const fetchTransactions = async (params?: {page?: number, limit?: number, materialId?: string, supplierId?: string, status?: TRANSACTION_STATUS}): Promise<{transactions?: Transaction[], success:boolean, message: string, total: number, limit: number, page: number}> => {
   const response = await axios.get(API_URL, { params });
   return response.data;
@@ -18,12 +23,12 @@ export const getCalculateSupplierMaterial = async (params?: {material?: string, 
   return response.data;
 };
 
-export const createTransaction = async (transaction: Omit<Transaction, 'id'|'supplier'|'material'>): Promise<{transaction?: Transaction, success:boolean, message: string}> => {
+export const createTransaction = async (transaction: TransactionPayload): Promise<{transaction?: Transaction, success:boolean, message: string}> => {
   const response = await axios.post(API_URL, transaction);
   return response.data;
 }
 
-export const patchTransaction = async (id: string, transaction: Partial<Omit<Transaction, 'id'|'supplier'|'material'>>): Promise<{transaction?: Transaction, success:boolean, message: string}> => {
+export const patchTransaction = async (id: string, transaction: TransactionPayload): Promise<{transaction?: Transaction, success:boolean, message: string}> => {
   const response = await axios.put(`${API_URL}/${id}`, transaction);
   return response.data;
 }
@@ -39,6 +44,6 @@ export const getTransactionById = async (id: string): Promise<{transaction?: Tra
 }
 
 export const getDetailedCosts = async (params:{material?: string, supplier?: string, status?: TRANSACTION_STATUS}): Promise<{total: number, materialCost: number, supplierCost: number, receivedCosts: number, notReceivedCosts: number, success:boolean, message: string}> => {
-  const response = await axios.get(`${API_URL}/detailed`, {params});
+  const response = await axios.get(`${API_URL}/detailed-costs`, {params});
   return response.data;
 }

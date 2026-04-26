@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Transaction, TRANSACTION_STATUS } from '../types'
-import { createTransaction, fetchSupplierMaterialTransactions, fetchTransactions, getCalculateSupplierMaterial, getDetailedCosts, getTransactionById, patchTransaction, removeTransaction } from '../api/transactions'
+import { createTransaction, fetchSupplierMaterialTransactions, fetchTransactions, getCalculateSupplierMaterial, getDetailedCosts, getTransactionById, patchTransaction, removeTransaction, type TransactionPayload } from '../api/transactions'
 import { toast } from 'react-toastify'
 
 export const useTransactions = () => {
@@ -44,7 +44,7 @@ export const useTransactions = () => {
     refetchTransactions()
   },[pagination, statusFilter, materialFilter, supplierFilter])
 
-  const addTransaction = async (transaction: Omit<Transaction, 'id'|'supplier'|'material'>) => {
+  const addTransaction = async (transaction: TransactionPayload) => {
     const {success, message} = await createTransaction(transaction)
     if(!success){
       toast.error(message || 'Failed to create transaction')
@@ -55,7 +55,7 @@ export const useTransactions = () => {
     refetchTransactions()
   }
 
-  const updateTransaction = async (id: string, transaction: Partial<Transaction>) => {
+  const updateTransaction = async (id: string, transaction: TransactionPayload) => {
     const {success, message} = await patchTransaction(id, transaction)
     if(!success){
       toast.error(message || 'Failed to update transaction')

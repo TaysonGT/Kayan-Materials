@@ -1,96 +1,82 @@
 import {Response, Request} from "express"
 import { myDataSource } from "../app-data-source";
 import { Material } from "../entity/material.entity";
-import { Supplier } from "../entity/supplier.entity";
 import { Transaction } from "../entity/transaction.entity";
-import { TRANSACTION_STATUS } from "../dto/add-transaction.dto";
+import { addTransactionDTO, checkStatus } from "../dto/add-transaction.dto";
+import { Invoice } from "../entity/invoice.entity";
 
 const materialRepo = myDataSource.getRepository(Material)
-const supplierRepo = myDataSource.getRepository(Supplier)
 const transactionRepo = myDataSource.getRepository(Transaction)
+const invoiceRepo = myDataSource.getRepository(Invoice)
 
-const transactionWithTotal = (transaction: Transaction)=>{
+export const transactionWithTotal = (transaction: Transaction)=>{
     return {...transaction, total: transaction.quantity*transaction.unitPrice}
 }
 
-const createTransaction = async (req: Request, res: Response) => {
-    const { materialId, supplierId, unitPrice, type, date, status, quantity } = req.body;
+const allTransactions = async (req: Request, res: Response) => {
+    const {page = '1', limit = '10', status, materialId, supplierId}: {page?:string, limit?:string, status?:string, supplierId?:string, materialId?: string} = req.query;
 
-    if (!materialId || !supplierId || !unitPrice || !date || !type) {
-        res.json({ message: "برجاء ادخال كل البيانات", success: false });
-        return;
-    }
+    const query = transactionRepo.createQueryBuilder('transactions')
+    .leftJoinAndSelect('transactions.material', 'material')
+    .leftJoinAndSelect('transactions.invoice', 'invoice')
+    .leftJoinAndSelect('invoice.supplier', 'supplier')
+    .orderBy('transactions.received_date', 'DESC')
 
-    if (type === 'material' && !quantity) {
-        res.json({ message: "برجاء ادخال الكمية", success: false });
-        return;
-    }
-
-    const supplier = await supplierRepo.findOne({ where: { id: supplierId }, relations: {materials: true} });
-    const material = await materialRepo.findOne({ where: { id: materialId } });
-
-    if (!supplier || !material) {
-        res.json({ message: "لم يتمكن العثور على المورد أو المادة", success: false });
-        return;
-    }
+    if(status==='received'||status==='pending') query.where('status = :status', {status});
+    materialId&& query.andWhere('material.id = :materialId', {materialId})
+    supplierId&& query.andWhere('supplier.id = :supplierId', {supplierId})
     
-    if (!supplier.materials || !supplier.materials.some(m => m.id === materialId)) {
-        res.json({ message: "هذه المادة غير موجودة في قائمة المورد", success: false });
-        return;
-    }
+    const [transactions, total] = await query
+    .skip((parseInt(page as string) - 1) * parseInt(limit as string))
+    .take(parseInt(limit as string))
+    .getManyAndCount();
 
-    const transaction = new Transaction();
-    transaction.material = material;
-    transaction.supplier = supplier;
-    transaction.quantity = quantity;
-    transaction.type = type;
-    transaction.unitPrice = unitPrice;
-    transaction.status = status || 'received';
-    transaction.date = new Date(date);
-    
-    if(type==='freight') {
-        transaction.quantity = 1;
-    }
-
-    await transactionRepo.save(transaction);
-    res.json({ transaction: transactionWithTotal(transaction), message: "تم إنشاء الحركة بنجاح", success: true });
+    res.json({ transactions: transactions.map(t=>transactionWithTotal(t)), total, page, limit, message: "تم جلب الحركات بنجاح", success: true });
 }
 
 const updateTransaction = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { materialId, supplierId, quantity, unitPrice, type, date, status } = req.body;
+    const { materialId, quantity, unitPrice, received_date, status }:addTransactionDTO = req.body;
 
-    const transaction = await transactionRepo.findOne({ where: { id: parseInt(id as string) } });
-
+    const transaction = await transactionRepo.createQueryBuilder('transaction')
+    .leftJoinAndSelect('transaction.invoice','invoice')
+    .leftJoinAndSelect('transaction.material', 'material1')
+    .leftJoinAndSelect('invoice.transactions', 'transactions')
+    .leftJoinAndSelect('transactions.material', 'material2')
+    .where('transaction.id=:id',{id})
+    .getOne()
+    
     if (!transaction) {
         res.json({ message: "الحركة غير موجودة", success: false });
         return;
     }
-
-    if(materialId){
-        const material = await materialRepo.findOne({ where: { id: materialId } });
-        if (!material) {
-            res.json({ message: "المادة غير موجودة", success: false })
-            return
-        }
-        transaction.material = material;
+    
+    if(!materialId){
+        res.json({ message: "برجاء إدخال الخام", success: false });
+        return;
+    }
+    
+    const material = await materialRepo.findOne({ where: { id: materialId } });
+    
+    if (!material) {
+        res.json({ message: "المادة غير موجودة", success: false })
+        return
+    }
+    
+    const invoiceTransactionsExceptCurrent = transaction.invoice.transactions.filter(t=>t.id!==transaction.id) 
+    const materialExistsInTransactions = invoiceTransactionsExceptCurrent.some(t=>t.material?.id === transaction.material?.id)
+    
+    if(materialExistsInTransactions){
+        res.json({ message: "هذه المادة موجودة بالفعل في الفاتورة", success: false })
+        return
     }
 
-    if(supplierId){
-        const supplier = await supplierRepo.findOne({ where: { id: supplierId } });
-        if (!supplier) {
-            res.json({ message: "المورد غير موجود", success: false })
-            return
-        }
-        transaction.supplier = supplier;
-    }
+    transaction.material = material;
 
     transaction.unitPrice = unitPrice||transaction.unitPrice;
     transaction.quantity = quantity||transaction.quantity;
-    transaction.type = type || transaction.type;
-    transaction.date = date? new Date(date): transaction.date;
-    transaction.status = Object.entries(TRANSACTION_STATUS).includes(status)? status : 'received';
-    
+    transaction.received_date = received_date? new Date(received_date): transaction.received_date;
+    transaction.status = checkStatus(status)? status : transaction.status;
 
     await transactionRepo.save(transaction);
     res.json({ transaction: transactionWithTotal(transaction), message: "تم تحديث الحركة بنجاح", success: true });
@@ -98,7 +84,12 @@ const updateTransaction = async (req: Request, res: Response) => {
 
 const getTransaction = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const transaction = await transactionRepo.findOne({ where: { id: parseInt(id as string) }, relations: ['material', 'supplier'] });
+    const transaction = await transactionRepo.createQueryBuilder('transaction')
+    .leftJoinAndSelect('transaction.material', 'material')
+    .leftJoinAndSelect('transaction.invoice', 'invoice')
+    .leftJoinAndSelect('invoice.supplier', 'supplier')
+    .where('transaction.id=:id', {id})
+    .getOne()
 
     if (!transaction) {
         res.json({ message: "الحركة غير موجودة", success: false });
@@ -109,36 +100,22 @@ const getTransaction = async (req: Request, res: Response) => {
 
 const deleteTransaction = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const transaction = await transactionRepo.findOne({ where: { id: parseInt(id as string) } });
+    const transaction = await transactionRepo.createQueryBuilder('transaction')
+    .leftJoinAndSelect('transaction.material', 'material')
+    .leftJoinAndSelect('transaction.invoice', 'invoice')
+    .leftJoinAndSelect('invoice.supplier', 'supplier')
+    .getOne()
+
     if (!transaction) {
         res.json({ message: "الحركة غير موجودة", success: false });
         return;
     }
+
     await transactionRepo.remove(transaction);
     res.json({ message: "تم حذف الحركة بنجاح", success: true });
 }
 
-const allTransactions = async (req: Request, res: Response) => {
-    const {page = '1', limit = '10', status, materialId, supplierId}: {page?:string, limit?:string, status?:string, supplierId?:string, materialId?: string} = req.query;
-
-    const query = transactionRepo.createQueryBuilder('transactions')
-    .leftJoinAndSelect('transactions.material', 'material')
-    .leftJoinAndSelect('transactions.supplier', 'supplier')
-    .orderBy('transactions.date', 'DESC')
-
-    if(status==='received'||status==='pending') query.where('transactions.status = :status', {status});
-    materialId&& query.andWhere('transactions.material = :materialId', {materialId})
-    supplierId&& query.andWhere('transactions.supplier.id = :supplierId', {supplierId})
-    
-    const [transactions, total] = await query
-    .skip((parseInt(page as string) - 1) * parseInt(limit as string))
-    .take(parseInt(limit as string))
-    .getManyAndCount();
-
-    res.json({ transactions: transactions.map(t=>transactionWithTotal(t)), total, page, limit, message: "تم جلب الحركات بنجاح", success: true });
-}
-
-const allٍSupplierMaterialTransactions = async (req: Request, res: Response) => {
+const allSupplierMaterialTransactions = async (req: Request, res: Response) => {
     const {page = '1', limit = '10', status, materialId, supplierId}: {page?:string, limit?:string, status?:string, supplierId?:string, materialId?: string} = req.query;
 
     if(!supplierId||!materialId){
@@ -147,8 +124,9 @@ const allٍSupplierMaterialTransactions = async (req: Request, res: Response) =>
 
     const query = transactionRepo.createQueryBuilder('transactions')
     .innerJoinAndSelect('transactions.material', 'material', 'material.id=:materialId', {materialId})
-    .innerJoinAndSelect('transactions.supplier', 'supplier', 'supplier.id=:supplierId', {supplierId})
-    .orderBy('transactions.date', 'DESC')
+    .innerJoinAndSelect('transactions.invoice', 'invoice')
+    .innerJoinAndSelect('invoice.supplier', 'supplier', 'supplier.id=:supplierId', {supplierId})
+    .orderBy('transactions.received_date', 'DESC')
 
     if(status==='received'||status==='pending') query.where('transactions.status = :status', {status});
     
@@ -164,9 +142,10 @@ const getTransactionsBySupplierId = async (req: Request, res: Response) => {
     const { supplierId } = req.params;
     const transactions = await transactionRepo.createQueryBuilder('transactions')
     .leftJoinAndSelect('transactions.material', 'material')
-    .leftJoinAndSelect('transactions.supplier', 'supplier')
+    .leftJoinAndSelect('transactions.invoice', 'invoice')
+    .leftJoinAndSelect('invoice.supplier', 'supplier')
     .where('supplier.id=:supplierId', {supplierId})
-    .orderBy('transactions.date', 'DESC')
+    .orderBy('transactions.received_date', 'DESC')
     .getMany()
     
     res.json({ transactions: transactions.map(t=>transactionWithTotal(t)), message: "تم جلب الحركات بنجاح", success: true });
@@ -176,53 +155,13 @@ const getTransactionsByMaterialId = async (req: Request, res: Response) => {
     const { materialId } = req.params;
     const transactions = await transactionRepo.createQueryBuilder('transactions')
     .leftJoinAndSelect('transactions.material', 'material')
-    .leftJoinAndSelect('transactions.supplier', 'supplier')
+    .leftJoinAndSelect('transactions.invoice', 'invoice')
+    .leftJoinAndSelect('invoice.supplier', 'supplier')
     .where('material.id=:materialId', {materialId})
-    .orderBy('transactions.date', 'DESC')
+    .orderBy('transactions.received_date', 'DESC')
     .getMany()
 
     res.json({ transactions: transactions.map(t=>transactionWithTotal(t)), message: "تم جلب الحركات بنجاح", success: true });
-}
-
-const getDetailedCosts = async (req: Request, res: Response) => {
-    const {status, material, supplier} = req.query
-    const query = transactionRepo.createQueryBuilder('transactions')
-    .leftJoinAndSelect('transactions.material', 'material')
-    .leftJoinAndSelect('transactions.supplier', 'supplier')
-    
-    if(status==='received'||status==='pending') query.where('transactions.status = :status', {status});
-    material&& query.andWhere('transactions.material = :material', {material})
-    supplier&& query.andWhere('transactions.supplier.id = :supplier', {supplier})
-
-    const transactions = await query
-    .getMany()
-
-    const materialCosts: Record<string, number> = {};
-    const supplierCosts: Record<string, number> = {};
-
-    const { receivedCosts, notReceivedCosts } = transactions.reduce((acc, transaction) => {
-        const supplierName = transaction.supplier.name;
-        const materialName = transaction.material.name;
-        const cost = transaction.unitPrice * (transaction.quantity || 1);
-        transaction.status==='received'? acc.receivedCosts = (acc.receivedCosts || 0) + cost : acc.notReceivedCosts = (acc.notReceivedCosts || 0) + cost;
-
-        if (!materialCosts[materialName]) {
-            materialCosts[materialName] = 0;
-        }
-        materialCosts[materialName] += cost;
-
-        if (!supplierCosts[supplierName]) {
-            supplierCosts[supplierName] = 0;
-        }
-        supplierCosts[supplierName] += cost;
-
-        return acc;
-    }, { receivedCosts: 0, notReceivedCosts: 0 });
-
-    const materialCost = Object.entries(materialCosts).map(([name, total]) => ({ name, total }));
-    const supplierCost = Object.entries(supplierCosts).map(([name, total]) => ({ name, total }));
-
-    res.json({ total: receivedCosts+notReceivedCosts, receivedCosts, notReceivedCosts, materialCost, supplierCost, message: "تم جلب التكاليف بنجاح", success: true });
 }
 
 const calculateMaterialSupplier = async (req: Request, res: Response) => {
@@ -233,41 +172,110 @@ const calculateMaterialSupplier = async (req: Request, res: Response) => {
         return;
     }
 
-    const transactions = await transactionRepo.createQueryBuilder('transactions')
-    .innerJoinAndSelect('transactions.material', 'material', 'material.id = :materialId', {materialId: material})
-    .innerJoinAndSelect('transactions.supplier', 'supplier', 'supplier.id = :supplierId', {supplierId: supplier})
-    .andWhere('transactions.material = :material', {material})
-    .andWhere('transactions.supplier.id = :supplier', {supplier})
-    .orderBy('transactions.date', 'DESC')
+    const invoices = await invoiceRepo.createQueryBuilder('invoices')
+    .innerJoinAndSelect('invoices.transactions', 'transactions')
+    .innerJoinAndSelect('invoices.supplier', 'supplier')
+    .innerJoinAndSelect('transactions.material', 'material')
+    .where('material.id = :material', {material})
+    .andWhere('supplier.id = :supplier', {supplier})
+    .orderBy('transactions.received_date', 'DESC')
     .getMany()
 
-    const { freightTotal, materialTotal, total, materialUnitCount } = transactions.reduce((acc, transaction) => {
-        const cost = transaction.unitPrice * (transaction.quantity || 1);
-        if(transaction.type==='freight'){
-          acc.freightTotal = (acc.freightTotal || 0) + cost  
-        } else{
-            acc.materialTotal = (acc.materialTotal || 0) + cost;
-            acc.materialUnitCount = (acc.materialUnitCount || 0) + (transaction.quantity || 0)
+    const freightTotal = invoices.reduce((acc, invoice)=>{
+        const totalInvoiceUnits = invoice.transactions.reduce((sum, t)=>sum+(t.quantity||0), 0)
+        const freightPerUnit = (invoice.freight || 0) / (totalInvoiceUnits || 1)
+        const transaction = invoice.transactions.find(t=>t.material?.id === material)
+        if(transaction) {
+            acc+= freightPerUnit*(transaction.quantity||0)
+            return acc;
         }
 
-        acc.total += cost;
+        return acc
+    },0)
+
+    const transactions = invoices.flatMap(i=>i.transactions.filter(t=>t.material?.id===material))
+
+    const { materialTotal, materialUnitCount } = transactions.reduce((acc, transaction) => {
+        const cost = transaction.unitPrice * (transaction.quantity || 1);
+        
+        acc.materialTotal = (acc.materialTotal || 0) + cost;
+        acc.materialUnitCount = (acc.materialUnitCount || 0) + (transaction.quantity || 0)
 
         return acc;
-    }, { freightTotal: 0, materialTotal: 0, total: 0, materialUnitCount:0 });
+    }, { materialTotal: 0, materialUnitCount:0 });
 
-    const averageCost = total/materialUnitCount
+    const averageCost = ((materialTotal+freightTotal)||0)/(materialUnitCount||1)
 
     res.json({averageCost, materialUnitCount, freightTotal, materialTotal, message: "تم حساب المتوسط", success: true });
 }
 
 
+const getDetailedCosts = async (req: Request, res: Response) => {
+    const {status, materialId, supplierId} = req.query
+    
+    const query = invoiceRepo.createQueryBuilder('invoice')
+        .innerJoinAndSelect('invoice.transactions', 'transactions')
+        .innerJoinAndSelect('invoice.supplier', 'supplier');
+        
+    if (!!materialId) {
+        query.innerJoinAndSelect('transactions.material', 'material')
+            .andWhere('material.id = :materialId', { materialId });
+    } else {
+        query.leftJoinAndSelect('transactions.material', 'material');
+    }
+    
+    if (supplierId) {
+        query.andWhere('supplier.id = :supplierId', { supplierId });
+    }
+    
+    const invoices = await query.getMany()
+
+    const materialCosts: Record<string, number> = {};
+    const supplierCosts: Record<string, number> = {};
+    
+    const { freightTotal, plainReceivedCosts, plainNotReceivedCosts, receivedUnits, notReceivedUnits } = invoices.reduce((acc, invoice) => {
+        const supplierName = invoice.supplier?.name||'unknown';
+        acc.freightTotal+= invoice.freight||0;
+
+        invoice.transactions?.forEach(transaction=>{
+            const materialName = transaction.material?.name||'unknown';
+            const quantity = transaction.quantity||1;
+            const cost = transaction.unitPrice * quantity;
+            
+            if(transaction.status==='received') {
+                acc.plainReceivedCosts += cost
+                acc.receivedUnits += quantity
+            } else {
+                acc.plainNotReceivedCosts += cost;
+                acc.notReceivedUnits += quantity
+            }
+    
+            materialCosts[materialName] = (materialCosts[materialName] || 0) + cost;
+            supplierCosts[supplierName] = (supplierCosts[supplierName] || 0) + cost;
+
+        })
+
+        return acc;
+    }, { freightTotal: 0, plainReceivedCosts: 0, plainNotReceivedCosts: 0, receivedUnits: 0, notReceivedUnits: 0 });
+
+    const totalUnits = receivedUnits+notReceivedUnits
+    const freightPerUnit = freightTotal/(totalUnits||1)
+
+    const receivedCosts = plainReceivedCosts+(freightPerUnit*receivedUnits)
+    const notReceivedCosts = plainNotReceivedCosts+(freightPerUnit*notReceivedUnits)
+
+    const materialCost = Object.entries(materialCosts).map(([name, total]) => ({ name, total }));
+    const supplierCost = Object.entries(supplierCosts).map(([name, total]) => ({ name, total }));
+
+    res.json({ total: receivedCosts + notReceivedCosts, receivedCosts, notReceivedCosts, materialCost, supplierCost, message: "تم جلب التكاليف بنجاح", success: true });
+}
+
 export {
-    createTransaction,
     updateTransaction,
     getTransaction,
     deleteTransaction,
     allTransactions,
-    allٍSupplierMaterialTransactions,
+    allSupplierMaterialTransactions,
     calculateMaterialSupplier,
     getTransactionsByMaterialId,
     getTransactionsBySupplierId,

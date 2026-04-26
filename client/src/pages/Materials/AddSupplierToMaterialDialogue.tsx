@@ -8,7 +8,7 @@ import { useSuppliers } from '../../hooks/useSuppliers'
 interface Props{ materialId: string, open: boolean, onClose: ()=>void, onSave: ()=>void }
 
 const AddSupplierToMaterialDialogue: React.FC<Props> = ({ materialId, open, onClose, onSave }) => {
-    const {addMaterialSupplier} = useMaterials()
+    const {addMaterialSupplier} = useMaterials({all:false})
     const {suppliers, modifyPagination} = useSuppliers()
 
     const [formData, setFormData] = useState({

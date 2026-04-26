@@ -16,7 +16,6 @@ const findMaterial = async (req:Request, res:Response)=>{
 
 const allMaterials = async (req:Request, res:Response)=>{
     const {page = 1, limit = 10} = req.query
-    // const materials = await materialRepo.find()
     const [materials, total] = await materialRepo.createQueryBuilder('materials')
     .leftJoinAndSelect('materials.suppliers', 'suppliers')
     .skip((parseInt(page as string) - 1) * parseInt(limit as string))
@@ -24,19 +23,8 @@ const allMaterials = async (req:Request, res:Response)=>{
     .orderBy('materials.addedAt', 'ASC')
     .getManyAndCount()
     
-
     res.json({materials, total, page, limit, success: true})
 }
-
-const getMaterialTransactions = async (req:Request, res:Response)=>{
-    const {id} = req.params
-    const material = await materialRepo.findOne({where: {id:id as string}, relations: ['transaction']})
-
-    if(material) {
-        res.json({transactions: material.transactions, success: true}) 
-    }else res.json({message: "هذه الخامة غير موجود", success: false})
-}
-
 
 const addMaterial = async(req: Request, res: Response)=>{
     const { name, description }:addMaterialDTO= req.body;
@@ -77,10 +65,17 @@ const updateMaterial = async (req: Request, res:Response) =>{
 
 const deleteMaterial = async (req:Request, res:Response) =>{
     const {id} = req.params
-    const material = await materialRepo.findOne({where: {id: id as string}})
+    const material = await materialRepo.createQueryBuilder('material')
+    .leftJoinAndSelect('material.transactions','transactions')
+    .getOne()
 
     if(!material){
-        res.json({message: "حدث خطأ", success: false})
+        res.json({message: "هذه الخامة غير موجودة", success: false})
+        return
+    }
+
+    if(material.transactions&&material.transactions.length>1){
+        res.json({message: "لا يمكن حذف الخامة لوجود حركات لها", success: false})
         return
     }
 
@@ -94,5 +89,4 @@ export {
     addMaterial,
     updateMaterial,
     deleteMaterial,
-    getMaterialTransactions
 }

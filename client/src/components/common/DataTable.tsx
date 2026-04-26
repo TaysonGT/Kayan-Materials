@@ -11,7 +11,7 @@ import {
   Box,
   Typography
 } from '@mui/material'
-import { FiEdit, FiTrash2 } from 'react-icons/fi'
+import { FiEdit, FiEye, FiTrash2 } from 'react-icons/fi'
 import { Loader } from '../ui'
 
 interface Column {
@@ -27,6 +27,7 @@ interface DataTableProps {
   withAcitons?: boolean
   onEdit?: (row: any) => void
   onDelete?: (row: any) => void
+  onPreview?: (row: any) => void
   emptyMessage?: string
   rowsPerPage?: number
   loading: boolean;
@@ -38,6 +39,7 @@ const DataTable: React.FC<DataTableProps> = ({
   loading,
   onEdit,
   onDelete,
+  onPreview,
   withAcitons=true,
   emptyMessage = 'لا توجد بيانات',
   rowsPerPage = 10
@@ -99,22 +101,36 @@ const DataTable: React.FC<DataTableProps> = ({
               {withAcitons&&
               <TableCell sx={{ textAlign: 'center' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
-                  <IconButton
-                    size="small"
-                    onClick={() => onEdit&&onEdit(row)}
-                    sx={{ color: '#1976d2' }}
-                    title="تعديل"
-                  >
-                    <FiEdit />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => onDelete&&onDelete(row)}
-                    sx={{ color: '#d32f2f' }}
-                    title="حذف"
-                  >
-                    <FiTrash2 />
-                  </IconButton>
+                  {onEdit&&
+                    <IconButton
+                      size="small"
+                      onClick={() => onEdit(row)}
+                      sx={{ color: '#1976d2' }}
+                      title="تعديل"
+                    >
+                      <FiEdit />
+                    </IconButton>
+                  }
+                  {onDelete&&
+                    <IconButton
+                      size="small"
+                      onClick={() => onDelete(row)}
+                      sx={{ color: '#d32f2f' }}
+                      title="حذف"
+                    >
+                      <FiTrash2 />
+                    </IconButton>
+                  }
+                  {onPreview&&
+                    <IconButton
+                      size="small"
+                      onClick={() => onPreview(row)}
+                      sx={{ color: '#040a4e' }}
+                      title="عرض"
+                    >
+                      <FiEye />
+                    </IconButton>
+                  }
                 </Box>
               </TableCell>
               }

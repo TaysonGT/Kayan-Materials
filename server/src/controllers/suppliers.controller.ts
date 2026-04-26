@@ -1,20 +1,20 @@
 import { Response, Request } from "express"
 import { myDataSource } from "../app-data-source";
-import { Material } from "../entity/material.entity";
 import { Supplier } from "../entity/supplier.entity";
 import { AddSupplierDTO } from "../dto/add-supplier.dto";
-import { In } from "typeorm";
+import { SupplierService } from "../services/supplier.service";
 
-const materialRepo = myDataSource.getRepository(Material)
 const supplierRepo = myDataSource.getRepository(Supplier)
+const supplierService = new SupplierService()
 
 const findSupplier = async (req:Request, res:Response)=>{
     const {id} = req.params
-    const supplier = await supplierRepo.findOne({where: {id: id as string}, relations: ['materials']})
-
-    if(supplier) {
-        res.json({supplier, success: true}) 
-    }else res.json({message: "هذا المورد غير موجود", success: false})
+    try{
+        const supplier = await supplierService.getSupplier(id as string)
+        res.json({success:true, supplier})
+    }catch(error){
+        res.json({success:false, message: error.message})
+    }
 }
 
 const allSuppliers = async (req:Request, res:Response)=>{
@@ -28,15 +28,6 @@ const allSuppliers = async (req:Request, res:Response)=>{
     .getManyAndCount()
 
     res.json({suppliers, success: true, total, page, limit})
-}
-
-const getSupplierTransactions = async (req:Request, res:Response)=>{
-    const {id} = req.params
-    const supplier = await supplierRepo.findOne({where: {id: id as string}, relations: ['transactions']})
-
-    if(supplier) {
-        res.json({transactions: supplier.transactions, success: true}) 
-    }else res.json({message: "هذا المورد غير موجود", success: false})
 }
 
 const addSupplier = async(req: Request, res: Response)=>{
@@ -62,29 +53,35 @@ const addSupplier = async(req: Request, res: Response)=>{
 
 const updateSupplier = async (req: Request, res:Response) =>{
     const {id} = req.params
-    const {name, address, phone1, phone2, materials: materialIds} = req.body;
+    const {name, address, phone1, phone2} = req.body;
 
-    let supplierData:AddSupplierDTO = {name, address, phone1, phone2, materials: materialIds}
+    let supplierData:AddSupplierDTO = {name, address, phone1, phone2}
     
-    const supplier = await supplierRepo.findOne({where: {id: id as string}})
-
-    const materials = await materialRepo.find({where: {id: In(materialIds)}})
-
-    if(supplier){
-        const updatedSupplier = Object.assign(supplier, supplierData, materials? {materials}: {})
+    try{
+        const supplier = await supplierService.getSupplier(id as string)
+        const updatedSupplier = Object.assign(supplier, supplierData)
         const updated = await supplierRepo.save(updatedSupplier)
         res.json({updated, message: "تم تحديث المورد بنجاح", success: true})
-    }else {
-        res.json({message: "هذا المورد غير موجود", success: false})
+    }catch(error){
+        res.json({success:false, message: error.message})
     }
+
 }
 
 const deleteSupplier = async (req:Request, res:Response) =>{
     const {id} = req.params
-    const supplier = await supplierRepo.findOne({where: {id: id as string}})
+    const supplier = await supplierRepo.createQueryBuilder('supplier')
+    .where('supplier.id=:id', {id})
+    .leftJoinAndSelect('supplier.invoices', 'invoices')
+    .getOne()
 
     if(!supplier){
-        res.json({message: "حدث خطأ", success: false})
+        res.json({message: "هذا المورد غير موجود", success: false})
+        return
+    }
+
+    if(supplier.invoices.length>0){
+        res.json({message: "لا يمكن حذف المورد لوجود فواتير باسمه", success: false})
         return
     }
 
@@ -98,5 +95,4 @@ export {
     addSupplier,
     updateSupplier,
     deleteSupplier,
-    getSupplierTransactions
 }

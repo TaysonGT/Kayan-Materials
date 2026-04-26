@@ -4,7 +4,7 @@ import { createMaterial, deleteMaterial, fetchMaterials, getMaterialById, getSup
 import { toast } from 'react-toastify'
 import { addMaterialToSupplier, removeSupplierMaterialRelation } from '../api/supplier-materials'
 
-export const useMaterials = () => {
+export const useMaterials = ({all=false}) => {
   const [materials, setMaterials] = useState<Material[]>([])
   const [pagination, setPagination] = useState({ page: 1, limit: 10 })
   const [maxPages, setMaxPages] = useState(0)
@@ -13,7 +13,7 @@ export const useMaterials = () => {
 
   const refetchMaterials = async () => {
     setLoading(true)
-    const {materials, success, message, total:materialsTotal} = await fetchMaterials(pagination.page, pagination.limit)
+    const {materials, success, message, total:materialsTotal} = await fetchMaterials(all? pagination.page:1, all? pagination.limit:200)
     if(!success){
       toast.error(message || 'Failed to fetch materials')
       return

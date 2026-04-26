@@ -29,7 +29,12 @@ export const DIALOG_TITLES = {
   transaction: {
     add: 'إنشاء حركة جديدة',
     edit: 'تعديل الحركة'
-  }
+  },
+  invoice: {
+    add: 'إنشاء فاتورة جديدة',
+    edit: 'تعديل الفاتورة'
+  },
+  
 }
 
 // Validation Messages
@@ -56,5 +61,10 @@ export const PAGE_HEADERS = {
     title: 'إدارة الحركات',
     subtitle: 'تتبع وإدارة جميع الحركات من الموردين والمواد',
     buttonText: 'إنشاء حركة'
+  },
+  invoices: {
+    title: 'إدارة الفواتير',
+    subtitle: 'تتبع وإدارة جميع الفواتير',
+    buttonText: 'إنشاء فاتورة'
   }
 }

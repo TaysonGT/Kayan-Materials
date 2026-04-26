@@ -1,6 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn } from "typeorm";
 import { Material } from "./material.entity";
 import { Supplier } from "./supplier.entity";
+import { Invoice } from "./invoice.entity";
+import { TRANSACTION_STATUS } from "../dto/add-transaction.dto";
 
 @Entity('transactions')
 export class Transaction{
@@ -10,8 +12,8 @@ export class Transaction{
     @ManyToOne(()=>Material, (material)=>material.transactions)
     material: Material;
 
-    @ManyToOne(()=>Supplier, (supplier)=>supplier.transactions)
-    supplier: Supplier;
+    @ManyToOne(()=>Invoice, (invoice)=>invoice.transactions)
+    invoice: Invoice;
     
     @Column()
     unitPrice: number;
@@ -20,13 +22,10 @@ export class Transaction{
     quantity: number;
 
     @Column({default: 'received'})
-    status: 'received'|'pending';
+    status: TRANSACTION_STATUS;
 
-    @Column()
-    type: 'freight'|'material';
-    
-    @Column()
-    date: Date;
+    @Column({ default: () => 'CURRENT_TIMESTAMP' })
+    received_date: Date;
 
     @CreateDateColumn()
     createdAt: Date;

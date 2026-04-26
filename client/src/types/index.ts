@@ -18,15 +18,23 @@ export interface Material {
 export interface Transaction {
   id: string
   material: Material
-  supplier: Supplier
-  materialId: string
-  supplierId: string
   unitPrice: number
   quantity: number
-  type: 'freight' | 'material'
   status: TRANSACTION_STATUS
-  date: string
+  invoice: Invoice;
+  received_date: string
   total?: number
+}
+
+export interface Invoice {
+  id: string;
+  description: string;
+  supplier: Supplier;
+  paid: number;
+  createdAt: Date;
+  transactions: Transaction[]
+  total?: number
+  freight?:number
 }
 
 // Common Types

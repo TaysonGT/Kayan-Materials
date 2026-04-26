@@ -1,33 +1,35 @@
 import { Container, Box, Chip, Button } from '@mui/material'
 import { useTransactions } from '../../hooks/useTransactions'
 import { PageHeader, DataTable, StatsCard } from '../../components/common'
-import type { Material, Supplier, Transaction } from '../../types'
-import { PAGE_HEADERS, VALIDATION_MESSAGES, DELIVERY_FILTER_OPTIONS } from '../../utils/constants'
-import { formatCurrency } from '../../utils/helpers'
+import type { Invoice, Material, Transaction } from '../../types'
+import { PAGE_HEADERS, DELIVERY_FILTER_OPTIONS } from '../../utils/constants'
+import { formatCurrency, formatDateDisplay } from '../../utils/helpers'
 import NavigationControl from '../../components/ui/NavigationControl'
 import { useState } from 'react'
-import CreateTransactionForm from './CreateTransactionForm'
-import EditTransactionForm from './EditTransactionForm'
 import { useSuppliers } from '../../hooks/useSuppliers'
 import  { useMaterials } from '../../hooks/useMaterials'
-import FiltersBar, { type FilterProps } from './FiltersBar'
+import FiltersBar, { type FilterProps } from '../../components/common/FiltersBar'
 import { FiEye } from 'react-icons/fi'
-import MaterialPriceModal from './MaterialPriceModal'
+import { useNavigate } from 'react-router'
+import MaterialAverageCost from './MaterialAverageCost'
 
 const TransactionsPage = () => {
-  const { transactions, loading, getSupplierMaterialCosts, getSupplierMaterialTransactions, detailedCosts, refetchTransactions, statusFilter, materialFilter, supplierFilter, setSupplierFilter, setMaterialFilter, setStatusFilter, pagination, modifyPagination, maxPages, deleteTransaction} = useTransactions()
+  const { transactions, loading, getSupplierMaterialCosts, getSupplierMaterialTransactions, detailedCosts, statusFilter, materialFilter, supplierFilter, setSupplierFilter, setMaterialFilter, setStatusFilter, pagination, modifyPagination, maxPages} = useTransactions()
   const { suppliers } = useSuppliers()
-  const { materials } = useMaterials()
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
-  const [showEditDialog, setShowEditDialog] = useState(false)
-  const [selectedEdit, setSelectedEdit] = useState<Transaction|null>(null)
+  const { materials } = useMaterials({all:true})
   const [showMaterialCostModal, setShowMaterialCostModal] = useState(false)
+  const navigate = useNavigate()
+  
+  // const [showCreateDialog, setShowCreateDialog] = useState(false)
+  // const [showEditDialog, setShowEditDialog] = useState(false)
+  // const [selectedEdit, setSelectedEdit] = useState<Transaction|null>(null)
 
-  const handleDelete = (transaction: Transaction) => {
-    if (window.confirm(VALIDATION_MESSAGES.deleteConfirm('هذه الفاتورة'))) {
-      deleteTransaction(transaction.id)
-    }
-  }
+
+  // const handleDelete = (transaction: Transaction) => {
+  //   if (window.confirm(VALIDATION_MESSAGES.deleteConfirm('هذه الفاتورة'))) {
+  //     deleteTransaction(transaction.id)
+  //   }
+  // }
 
   const filters: FilterProps[] = [
     {
@@ -59,9 +61,9 @@ const TransactionsPage = () => {
 
     },
     {
-      field: 'supplier',
+      field: 'invoice',
       label: 'المورد',
-      render: (supplier: Supplier) => supplier.name,
+      render: (invoice: Invoice) => invoice?.supplier?.name,
       align: 'center' as const
 
     },
@@ -72,25 +74,9 @@ const TransactionsPage = () => {
       align: 'center' as const
     },
     {
-      field: 'type',
-      label: 'النوع',
-      render: (value: string) => {
-        switch (value) {
-          case 'material':
-            return 'فاتورة';
-          case 'freight':
-            return 'نولون';
-          default:
-            return value;
-        }
-      },
-      align: 'center' as const
-    },
-    {
       field: 'unitPrice',
       label: 'سعر الوحدة',
-      align: 'center' as const
-,
+      align: 'center' as const,
       render: (value: any) => formatCurrency(value)
     },
     {
@@ -100,13 +86,9 @@ const TransactionsPage = () => {
       render: (value: any) => value ? value : '-'
     },
     { 
-      field: 'date', label: 'التاريخ', 
+      field: 'received_date', label: 'التاريخ', 
       render: (date: string)=> 
-        date?new Date(date).toLocaleDateString('ar-EG', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        }):'-',
+        date? formatDateDisplay(date) : '-',
         align: 'center' as const
     },
     {
@@ -136,14 +118,15 @@ const TransactionsPage = () => {
         title={PAGE_HEADERS.transactions.title}
         subtitle={PAGE_HEADERS.transactions.subtitle}
         buttonText={PAGE_HEADERS.transactions.buttonText}
-        onAddClick={() => setShowCreateDialog(true)}
+        // onAddClick={() => setShowCreateDialog(true)}
+        onAddClick={() => 0}
       />
 
       {/* Stats */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 2, mb: 3 }}>
         <StatsCard
           value={formatCurrency(detailedCosts.receivedCosts)}
-          label="إجمالي المسلم"
+          label="الحركات المسلمة"
           backgroundColor="#e8f5e9"
           textColor="#388e3c"
           captionColor="#2e7d32"
@@ -151,7 +134,7 @@ const TransactionsPage = () => {
         />
         <StatsCard
           value={formatCurrency(detailedCosts.notReceivedCosts)}
-          label="إجمالي المعلق"
+          label="الحركات المعلقة"
           backgroundColor="#fff3e0"
           textColor="#f57c00"
           captionColor="#e65100"
@@ -159,18 +142,10 @@ const TransactionsPage = () => {
         />
         <StatsCard
           value={transactions.length}
-          label="إجمالي الفواتير"
+          label="إجمالي الحركات"
           backgroundColor="#f3e5f5"
           textColor="#7b1fa2"
           captionColor="#6a1b9a"
-          loading={loading}
-        />
-        <StatsCard
-          value={transactions.filter(i => i.status==='pending').length}
-          label="فواتير معلقة"
-          backgroundColor="#e3f2fd"
-          textColor="#1976d2"
-          captionColor="#1565c0"
           loading={loading}
         />
       </Box>
@@ -190,10 +165,11 @@ const TransactionsPage = () => {
         columns={tableColumns}
         rows={transactions}
         loading={loading}
-        onEdit={(transaction: Transaction)=>{
-          setSelectedEdit(transaction);
-          setShowEditDialog(true)}}
-        onDelete={handleDelete}
+        // onEdit={(transaction: Transaction)=>{
+        //   setSelectedEdit(transaction);
+        //   setShowEditDialog(true)}}
+        // onDelete={handleDelete}
+        onPreview={(transaction: Transaction)=>transaction.invoice&&navigate(`/invoices/${transaction.invoice?.id}`)}
       />
 
       <NavigationControl
@@ -202,20 +178,20 @@ const TransactionsPage = () => {
         modifyPagination={modifyPagination}
       />
 
-      <CreateTransactionForm
+      {/* <CreateTransactionForm
       onSave={refetchTransactions}
       show={showCreateDialog}
       hide={()=>setShowCreateDialog(false)}
-      />
+      /> */}
 
-      <EditTransactionForm
+      {/* <EditTransactionForm
       onSave={refetchTransactions}
       show={showEditDialog}
       hide={()=>{setShowEditDialog(false);setSelectedEdit(null)}}
       transaction={selectedEdit}
-      />
+      /> */}
 
-      <MaterialPriceModal
+      <MaterialAverageCost
       open={showMaterialCostModal}
       onClose={()=>setShowMaterialCostModal(false)}
       getMaterialSupplierCosts={getSupplierMaterialCosts}

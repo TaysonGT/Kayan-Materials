@@ -12,6 +12,8 @@ import MaterialsPage from './pages/Materials'
 import { useEffect } from 'react'
 import axios from 'axios'
 import TransactionsPage from './pages/Transactions'
+import InvoicesPage from './pages/Invoices'
+import SingleInvoicePage from './pages/Invoices/SingleInvoice'
 
 const cacheRtl = createCache({
   key: 'muirtl',
@@ -48,6 +50,10 @@ function App() {
             <Route path='suppliers' element={<SupplierPage />}/>
             <Route path='materials' element={<MaterialsPage />}/>
             <Route path='transactions' element={<TransactionsPage />}/>
+            <Route path='/invoices'>
+              <Route index path='/invoices' element={<InvoicesPage />}/>
+              <Route path='/invoices/:invoiceId' element={<SingleInvoicePage />}/>
+            </Route>
           </Route>
         </Routes>
         </BrowserRouter>

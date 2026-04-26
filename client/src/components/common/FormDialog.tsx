@@ -26,6 +26,7 @@ interface FormField {
   options?: Array<{ value: any; label: string, selected?:boolean }>
   value?: any
   selected?: any;
+  readOnly?: boolean
   onChange?: (value: any) => void
 }
 
@@ -64,8 +65,9 @@ const FormDialog: React.FC<FormDialogProps> = ({
                   label={field.label}
                   type="number"
                   fullWidth
+                  aria-readonly={field.readOnly}
                   required={field.required}
-                  value={formData[field.name] || ''}
+                  value={field.value || formData[field.name] || ''}
                   onChange={(e) => onChange(field.name, e.target.value)}
                 />
               )
@@ -79,6 +81,7 @@ const FormDialog: React.FC<FormDialogProps> = ({
                     label={field.label}
                     defaultValue={field.value || formData[field.name] ||  ''}
                     onChange={(e) => onChange(field.name, e.target.value)}
+                    aria-readonly={field.readOnly}
                     required={field.required}
                   >
                     {field.options?.map((opt) => (
@@ -101,6 +104,7 @@ const FormDialog: React.FC<FormDialogProps> = ({
                     label={field.label}
                     value={formData[field.name] || []}
                     onChange={(e) => onChange(field.name, e.target.value)}
+                    aria-readonly={field.readOnly}
                     required={field.required}
                   >
                     {field.options?.map((opt) => (
@@ -121,6 +125,7 @@ const FormDialog: React.FC<FormDialogProps> = ({
                   label={field.label}
                   type="date"
                   fullWidth
+                  aria-readonly={field.readOnly}
                   required={field.required}
                   value={formData[field.name] || formData.value}
                   onChange={(e) => onChange(field.name, e.target.value)}
@@ -137,6 +142,7 @@ const FormDialog: React.FC<FormDialogProps> = ({
                     value={formData[field.name] || formData.value || []}
                     onChange={(e) => onChange(field.name, e.target.checked)}
                     required={field.required}
+                    aria-readonly={field.readOnly}
                   />
                 }
                 label={field.label}
@@ -155,8 +161,10 @@ const FormDialog: React.FC<FormDialogProps> = ({
                 multiline={field.multiline}
                 rows={field.rows || 1}
                 placeholder={field.placeholder}
-                value={formData[field.name] || ''}
+                value={field.value || formData[field.name] || ''}
                 onChange={(e) => onChange(field.name, e.target.value)}
+                aria-readonly={field.readOnly}
+                focused={!field.readOnly}
               />
             )
           })}

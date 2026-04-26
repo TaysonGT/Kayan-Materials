@@ -63,3 +63,10 @@ export const formatDateInput = (date: string|number|Date): string => {
   return new Date(date).toISOString().split('T')[0]
 }
 
+export const formatDateDisplay = (date: string|number|Date): string => {
+  return new Date(date).toLocaleDateString('ar-EG', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}

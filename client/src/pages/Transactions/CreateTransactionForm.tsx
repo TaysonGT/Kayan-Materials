@@ -2,61 +2,48 @@ import React, { useEffect, useState } from 'react'
 import { FormDialog } from '../../components/common'
 import { toast } from 'react-toastify'
 import { DIALOG_TITLES, VALIDATION_MESSAGES } from '../../utils/constants'
-import { useSuppliers } from '../../hooks/useSuppliers'
-import { useTransactions } from '../../hooks/useTransactions'
-import type { Material, TRANSACTION_STATUS } from '../../types'
+import type { Invoice, TRANSACTION_STATUS } from '../../types'
+import { useMaterials } from '../../hooks/useMaterials'
+import { addTransactionToInvoice } from '../../api/invoices'
 
 interface Props{
+    invoice?: Invoice
     show: boolean
     hide: ()=>void
     onSave: ()=>void
 }
 
-const CreateTransactionForm:React.FC<Props> = ({show, hide, onSave}) => {
-    const { suppliers, getSupplierMaterials} = useSuppliers(true)
-    const { refetchTransactions, addTransaction } = useTransactions()
-    const [materials, setMaterials] = useState<Material[]>([])
-
-    const fetchMaterials = async () => {
-        const materials = await getSupplierMaterials(formData.supplierId)
-        setMaterials(materials||[])
-    }
-
+const CreateTransactionForm:React.FC<Props> = ({show, hide, onSave, invoice}) => {
+    const { materials } = useMaterials({all:true})
+    const [isLoading, setIsLoading] = useState(false)
+    
     const [formData, setFormData] = useState({
-        supplierId: '',
+        invoiceId: invoice?.id || '',
         materialId: '',
         unitPrice: 0,
         quantity: 0,
-        type: 'material' as 'material' | 'freight',
         status: 'received' as TRANSACTION_STATUS,
-        date: new Date().toISOString().split('T')[0],
+        received_date: new Date().toISOString().split('T')[0],
     })
 
     useEffect(()=>{
         setFormData({
-            supplierId: '',
+            invoiceId: invoice?.id || '',
             materialId: '',
             quantity: 0,
             unitPrice: 0,
-            type: 'material',
             status: 'received',
-            date: new Date().toISOString().split('T')[0]
+            received_date: new Date().toISOString().split('T')[0]
         })
     },[show])
-
-    useEffect(()=>{
-        if(formData.supplierId){
-            fetchMaterials()            
-        }
-    },[formData.supplierId])
 
     const formFields = [
         {
         name: 'supplierId',
         label: 'المورد',
-        type: 'select' as const,
-        required: true,
-        options: suppliers.map(s => ({ value: s.id, label: s.name }))
+        type: 'text' as const,
+        readOnly: true,
+        value: invoice?.supplier?.name
         },
         {
         name: 'materialId',
@@ -67,7 +54,7 @@ const CreateTransactionForm:React.FC<Props> = ({show, hide, onSave}) => {
         },
         { name: 'unitPrice', label: 'سعر الوحدة', type: 'number' as const, required: true },
         { name: 'quantity', label: 'الكمية', type: 'number' as const, required: true },
-        { name: 'date', label: 'التاريخ', type: 'date' as const, required: true },
+        { name: 'received_date', label: 'التاريخ', type: 'date' as const, required: true },
         {
         name: 'status',
         label: 'حالة الإستلام',
@@ -76,12 +63,6 @@ const CreateTransactionForm:React.FC<Props> = ({show, hide, onSave}) => {
         options: [
             {label: 'تم الإستلام', value: 'received'},
             {label: 'معلق', value: 'pending'}]
-        },
-        { 
-        name: 'type', label: 'النوع', type: 'select' as const, required: true, options: [
-            { value: 'material', label: 'خام' },
-            { value: 'freight', label: 'نولون' }
-        ] 
         }
     ]
 
@@ -95,12 +76,18 @@ const CreateTransactionForm:React.FC<Props> = ({show, hide, onSave}) => {
     }
 
     const handleSave = async () => {
-      if (!formData.supplierId || !formData.materialId || formData.unitPrice <= 0 ) {
+      if (!formData.invoiceId || !formData.materialId || formData.unitPrice <= 0 ) {
         toast.error(VALIDATION_MESSAGES.transaction)
         return
       }
-      await addTransaction(formData)
-      refetchTransactions()
+      setIsLoading(true)
+      const {success, message} = await addTransactionToInvoice(formData)
+      if(!success){
+        toast.error(message)
+        return
+      }
+      toast.success(message || 'تم إضافة الحركة بنجاح')
+      setIsLoading(false)
       onSave()
       hide()
     }
@@ -117,6 +104,7 @@ const CreateTransactionForm:React.FC<Props> = ({show, hide, onSave}) => {
         onClose={hide}
         onSave={handleSave}
         onChange={handleFieldChange}
+        isLoading={isLoading}
       />
   )
 }

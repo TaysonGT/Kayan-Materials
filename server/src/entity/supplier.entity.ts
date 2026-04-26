@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable } from "typeorm";
 import { Transaction } from "./transaction.entity";
 import { Material } from "./material.entity";
+import { Invoice } from "./invoice.entity";
 
 @Entity('suppliers')
 export class Supplier{
@@ -19,8 +20,8 @@ export class Supplier{
     @Column({nullable:true})
     address?: string
     
-    @OneToMany(()=>Transaction, (transaction)=>transaction.supplier)
-    transactions: Transaction[];
+    @OneToMany(()=>Invoice, (invoice)=>invoice.supplier)
+    invoices: Invoice[];
 
     @ManyToMany(()=>Material, (material)=>material.suppliers)
     @JoinTable({

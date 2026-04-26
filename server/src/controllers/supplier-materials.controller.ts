@@ -8,32 +8,26 @@ const supplierRepo = myDataSource.getRepository(Supplier)
 
 const getSupplierMaterials = async (req:Request, res:Response)=>{
     const {id} = req.params
-    const supplier = await supplierRepo.createQueryBuilder('supplier')
-    .where('supplier.id = :id', {id: id as string})
-    .leftJoinAndSelect('supplier.materials', 'materials')
-    .getOne()
+    const materials = await materialRepo.createQueryBuilder('materials')
+    .leftJoinAndSelect('materials.suppliers', 'suppliers')
+    .leftJoinAndSelect('materials.transactions', 'transactions')
+    .leftJoinAndSelect('transactions.invoice', 'invoice')
+    .leftJoinAndSelect('invoice.supplier', 'supplier')
+    .where('suppliers.id = :id', {id: id as string})
+    .orWhere('supplier.id = :id', {id: id as string})
+    .getMany()
 
-    if(!supplier) {
-        res.json({message: "هذا المورد غير موجود", success: false})
-        return;
-    }
-
-    res.json({materials: supplier.materials||[], success: true, message: "تم جلب المواد الخام الخاصة بالمورد بنجاح"})
+    res.json({materials: materials||[], success: true, message: "تم جلب المواد الخام الخاصة بالمورد بنجاح"})
 }
 
 const getMaterialSuppliers = async (req:Request, res:Response)=>{
     const {id} = req.params
-    const material = await materialRepo.createQueryBuilder('material')
-    .where('material.id = :id', {id: id as string})
-    .leftJoinAndSelect('material.suppliers', 'suppliers')
-    .getOne()
+    const suppliers = await supplierRepo.createQueryBuilder('suppliers')
+    .leftJoinAndSelect('suppliers.materials', 'materials')
+    .where('materials.id = :id', {id: id as string})
+    .getMany()
 
-    if(!material) {
-        res.json({message: "هذه الخامة غير موجودة", success: false})
-        return;
-    }
-
-    res.json({suppliers: material.suppliers, success: true, message: "تم جلب الموردين الذين يوردون هذه الخامة بنجاح"})
+    res.json({suppliers: suppliers, success: true, message: "تم جلب الموردين الذين يوردون هذه الخامة بنجاح"})
     return;
 }
 
@@ -80,7 +74,7 @@ const removeSupplierMaterial = async (req: Request, res: Response) => {
     const { supplierId, materialId } = req.params;
         
     const supplier = await supplierRepo.createQueryBuilder('supplier')
-    .where('supplier.id = :id', {id: supplierId as string})
+    .where('supplier.id = :id', {id: supplierId})
     .leftJoinAndSelect('supplier.materials', 'materials', 'materials.id = :materialId', {materialId: materialId as string})
     .leftJoinAndSelect('supplier.transactions', 'transactions')
     .getOne()
@@ -94,14 +88,8 @@ const removeSupplierMaterial = async (req: Request, res: Response) => {
         res.json({success: false, message: "هذه الخامة غير موجودة في قائمة هذا المورد"})
         return;
     }
-    
-    if(supplier.transactions&&supplier.transactions.length>0){
-        res.json({success: false, message: "لا يمكن حذف هذه العلاقة بين المورد والخامة لوجود معاملات تعتمد عليها"})
-        return;
-    }
 
     supplier.materials = supplier.materials?.filter((m) => m.id !== materialId)
-    
     await supplierRepo.save(supplier)
 
     res.json({message: "تم حذف العلاقة بين المورد والخامة بنجاح", success: true})

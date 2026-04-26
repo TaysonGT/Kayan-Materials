@@ -1,12 +1,13 @@
 import { Box, Button, Chip, Dialog, DialogContent, DialogTitle, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useSuppliers } from '../../hooks/useSuppliers'
-import { type Transaction, type Material, type Supplier } from '../../types'
+import { type Transaction, type Material, type Supplier, type Invoice } from '../../types'
 import FiltersBar, { type FilterProps } from './FiltersBar'
 import { DataTable, StatsCard } from '../../components/common'
 import { formatCurrency } from '../../utils/helpers'
 import { toast } from 'react-toastify'
 import NavigationControl from '../../components/ui/NavigationControl'
+import { getSupplierAssociatedMaterials } from '../../services/materials.service'
 
 interface Props {
     open: boolean,
@@ -30,13 +31,13 @@ interface Props {
     } | undefined>
 }
 
-const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierCosts, getMaterialSupplierTransactions}) => {
+const MaterialAverageCost:React.FC<Props> = ({open, onClose, getMaterialSupplierCosts, getMaterialSupplierTransactions}) => {
     const [selectedSupplier, setSelectedSupplier] = useState<Supplier|undefined>()
     const [selectedMaterial, setSelectedMaterial] = useState<Material|undefined>()
     const {suppliers} = useSuppliers()
     const [materials, setMaterials] = useState<Material[]>([])
     const [transactions, setTransactions] = useState<Transaction[]>([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [pagination, setPagination] = useState({ page: 1, limit: 10 })
     const [maxPages, setMaxPages] = useState(0)
     const [total, setTotal] = useState(0)
@@ -55,6 +56,7 @@ const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierC
       setTransactions([])
       setPagination({page:1, limit:10})
       setCostInfo(undefined)
+      setLoading(false)
     }
 
     const calculate = async()=>{
@@ -101,9 +103,9 @@ const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierC
     
         },
         {
-          field: 'supplier',
+          field: 'invoice',
           label: 'المورد',
-          render: (supplier: Supplier) => supplier.name,
+          render: (invoice: Invoice) => invoice?.supplier?.name,
           align: 'center' as const
     
         },
@@ -182,8 +184,16 @@ const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierC
     }
     ]
 
+    const loadMaterials = async (supplier?:Supplier)=>{
+      if(supplier){
+        getSupplierAssociatedMaterials(supplier.id)
+        .then((materials)=>setMaterials(materials))
+        .catch(err=> toast.error(err.message))
+      }
+    }
+
     useEffect(()=>{
-        selectedSupplier&&setMaterials(selectedSupplier.materials||[])
+      selectedSupplier && loadMaterials(selectedSupplier)
     },[selectedSupplier])
 
   return (
@@ -254,4 +264,4 @@ const MaterialPriceModal:React.FC<Props> = ({open, onClose, getMaterialSupplierC
   )
 }
 
-export default MaterialPriceModal
+export default MaterialAverageCost

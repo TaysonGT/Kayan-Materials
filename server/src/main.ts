@@ -8,6 +8,7 @@ import materialRouter from './routes/material.router';
 import supplierRouter from './routes/supplier.router';
 import transactionRouter from './routes/transaction.router';
 import supplierMaterialRouter from './routes/supplier-material.router';
+import invoiceRouter from './routes/invoice.router';
 
 // Load environment variables
 dotenv.config();
@@ -47,6 +48,7 @@ app.use(`${API_PREFIX}/materials`, materialRouter)
 app.use(`${API_PREFIX}/suppliers`, supplierRouter)
 app.use(`${API_PREFIX}/supplier-materials`, supplierMaterialRouter)
 app.use(`${API_PREFIX}/transactions`, transactionRouter)
+app.use(`${API_PREFIX}/invoices`, invoiceRouter)
 
 // Server Running
 myDataSource
