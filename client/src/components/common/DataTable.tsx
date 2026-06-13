@@ -1,16 +1,4 @@
 import React from 'react'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-  Box,
-  Typography
-} from '@mui/material'
 import { FiEdit, FiEye, FiTrash2 } from 'react-icons/fi'
 import { Loader } from '../ui'
 
@@ -53,92 +41,66 @@ const DataTable: React.FC<DataTableProps> = ({
       )
   }
 
-  if (rows.length<1) {
+  if (rows.length < 1) {
     return (
-      <Paper sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {emptyMessage}
-        </Typography>
-      </Paper>
+      <div className="p-6 text-center border border-[#e8e8e8] rounded-sm shadow-sm bg-white">
+        <div className="text-sm text-gray-500">{emptyMessage}</div>
+      </div>
     )
   }
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+    <div className="overflow-auto border border-[#e8e8e8] bg-white rounded-sm shadow-md">
+      <table className="min-w-full">
+        <thead className="bg-[#797979] text-white">
+          <tr>
             {columns.map((col) => (
-              <TableCell
+              <th
                 key={col.field}
-                sx={{ fontWeight: 600 }}
-                align={col.align || 'left'}
+                className={`px-4 py-2 font-semibold ${col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-start'}`}
               >
                 {col.label}
-              </TableCell>
+              </th>
             ))}
-            { withAcitons&&
-              <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>
-                الإجراءات
-              </TableCell>
-            }
-          </TableRow>
-        </TableHead>
-        <TableBody>
+            {withAcitons && (
+              <th className="px-4 py-2 font-semibold text-center">الإجراءات</th>
+            )}
+          </tr>
+        </thead>
+        <tbody>
           {rows.slice(0, rowsPerPage).map((row, idx) => (
-            <TableRow
-              key={row.id || idx}
-              sx={{ '&:hover': { backgroundColor: '#fafafa' } }}
-            >
+            <tr key={row.id || idx} className="hover:bg-gray-50">
               {columns.map((col) => (
-                <TableCell
-                  key={`${row.id}-${col.field}`}
-                  align={col.align || 'left'}
-                >
+                <td key={`${row.id}-${col.field}`} className={`px-4 py-2 align-top ${col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-start'}`}>
                   {col.render ? col.render(row[col.field], row) : row[col.field]}
-                </TableCell>
+                </td>
               ))}
-              {withAcitons&&
-              <TableCell sx={{ textAlign: 'center' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
-                  {onEdit&&
-                    <IconButton
-                      size="small"
-                      onClick={() => onEdit(row)}
-                      sx={{ color: '#1976d2' }}
-                      title="تعديل"
-                    >
-                      <FiEdit />
-                    </IconButton>
-                  }
-                  {onDelete&&
-                    <IconButton
-                      size="small"
-                      onClick={() => onDelete(row)}
-                      sx={{ color: '#d32f2f' }}
-                      title="حذف"
-                    >
-                      <FiTrash2 />
-                    </IconButton>
-                  }
-                  {onPreview&&
-                    <IconButton
-                      size="small"
-                      onClick={() => onPreview(row)}
-                      sx={{ color: '#040a4e' }}
-                      title="عرض"
-                    >
-                      <FiEye />
-                    </IconButton>
-                  }
-                </Box>
-              </TableCell>
-              }
-            </TableRow>
+              {withAcitons && (
+                <td className="px-4 py-2 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    {onEdit && (
+                      <button title="تعديل" onClick={() => onEdit(row)} className="p-1 text-blue-600 hover:bg-gray-100 rounded">
+                        <FiEdit />
+                      </button>
+                    )}
+                    {onDelete && (
+                      <button title="حذف" onClick={() => onDelete(row)} className="p-1 text-red-600 hover:bg-gray-100 rounded">
+                        <FiTrash2 />
+                      </button>
+                    )}
+                    {onPreview && (
+                      <button title="عرض" onClick={() => onPreview(row)} className="p-1 text-gray-900 hover:bg-gray-100 rounded">
+                        <FiEye />
+                      </button>
+                    )}
+                  </div>
+                </td>
+              )}
+            </tr>
           ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </tbody>
+      </table>
+    </div>
   )
 }
 

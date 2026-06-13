@@ -8,12 +8,12 @@ import { addTransactionToInvoice } from '../../api/invoices'
 
 interface Props{
     invoice?: Invoice
-    show: boolean
+    open: boolean
     hide: ()=>void
     onSave: ()=>void
 }
 
-const CreateTransactionForm:React.FC<Props> = ({show, hide, onSave, invoice}) => {
+const CreateTransactionForm:React.FC<Props> = ({open, hide, onSave, invoice}) => {
     const { materials } = useMaterials({all:true})
     const [isLoading, setIsLoading] = useState(false)
     
@@ -35,7 +35,7 @@ const CreateTransactionForm:React.FC<Props> = ({show, hide, onSave, invoice}) =>
             status: 'received',
             received_date: new Date().toISOString().split('T')[0]
         })
-    },[show])
+    },[open])
 
     const formFields = [
         {
@@ -93,10 +93,10 @@ const CreateTransactionForm:React.FC<Props> = ({show, hide, onSave, invoice}) =>
     }
 
 
-  return (
-    
-      <FormDialog
-        open={show}
+    return (
+      
+            <FormDialog
+                open={open}
         // title={editingId ? DIALOG_TITLES.transaction.edit : DIALOG_TITLES.transaction.add}
         title={DIALOG_TITLES.transaction.add}
         fields={formFields}

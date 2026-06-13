@@ -1,4 +1,4 @@
-import { Container, Box } from '@mui/material'
+import React from 'react'
 import { PageHeader, DataTable, StatsCard } from '../../components/common'
 import type { Invoice, Supplier, Transaction } from '../../types'
 import { PAGE_HEADERS, VALIDATION_MESSAGES } from '../../utils/constants'
@@ -12,6 +12,7 @@ import { useInvoices } from '../../hooks/useInvoices'
 import CreateInvoiceForm from './CreateInvoiceForm'
 import { useNavigate } from 'react-router'
 import EditInvoiceForm from './EditInvoiceForm'
+import { RiBillLine } from 'react-icons/ri'
 
 const InvoicesPage = () => {
   const { invoices, loading, refetchInvoices, materialFilter, supplierFilter, setSupplierFilter, setMaterialFilter, pagination, modifyPagination, maxPages, removeInvoice} = useInvoices({autoRefetch:true})
@@ -79,100 +80,26 @@ const InvoicesPage = () => {
   ]
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <PageHeader
-        title={PAGE_HEADERS.invoices.title}
-        subtitle={PAGE_HEADERS.invoices.subtitle}
-        buttonText={PAGE_HEADERS.invoices.buttonText}
-        onAddClick={() => setShowCreateDialog(true)}
-      />
+    <div className="max-w-screen-lg mx-auto py-4">
+      <PageHeader title={PAGE_HEADERS.invoices.title} subtitle={PAGE_HEADERS.invoices.subtitle} buttonText={PAGE_HEADERS.invoices.buttonText} onAddClick={() => setShowCreateDialog(true)} />
 
       {/* Stats */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 2, mb: 3 }}>
-        {/* <StatsCard
-          value={formatCurrency(detailedCosts.receivedCosts)}
-          label="إجمالي المسلم"
-          backgroundColor="#e8f5e9"
-          textColor="#388e3c"
-          captionColor="#2e7d32"
-          loading={loading}
-        />
-        <StatsCard
-          value={formatCurrency(detailedCosts.notReceivedCosts)}
-          label="إجمالي المعلق"
-          backgroundColor="#fff3e0"
-          textColor="#f57c00"
-          captionColor="#e65100"
-          loading={loading}
-        /> */}
-        <StatsCard
-          value={invoices.length}
-          label="إجمالي الفواتير"
-          backgroundColor="#f3e5f5"
-          textColor="#7b1fa2"
-          captionColor="#6a1b9a"
-          loading={loading}
-        />
-        {/* <StatsCard
-          value={transactions.filter(i => i.status==='pending').length}
-          label="فواتير معلقة"
-          backgroundColor="#e3f2fd"
-          textColor="#1976d2"
-          captionColor="#1565c0"
-          loading={loading}
-        /> */}
-      </Box>
-      
-      <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'start'}}>
-        <FiltersBar filters={filters}/>
-        {/* <Button
-          dir='ltr'
-          variant="contained"
-          startIcon={<FiEye />}
-          onClick={()=>setShowMaterialCostModal(true)}>
-          متوسط سعر الخام
-        </Button> */}
-      </Box>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+        <StatsCard value={invoices.length} label="إجمالي الفواتير" loading={loading} icon={<RiBillLine />} />
+      </div>
 
-      <DataTable
-        columns={tableColumns}
-        rows={invoices}
-        loading={loading}
-        onEdit={(invoice: Invoice)=>{
-          setSelectedEdit(invoice);
-          setShowEditDialog(true)}}
-        onDelete={handleDelete}
-        onPreview={(invoice: Invoice)=>navigate(`/invoices/${invoice.id}`)}
-      />
+      <div className="flex justify-between items-start">
+        <FiltersBar filters={filters} />
+      </div>
 
-      <NavigationControl
-        pageCount={pagination.page}
-        maxPages={maxPages}
-        modifyPagination={modifyPagination}
-      />
+      <DataTable columns={tableColumns} rows={invoices} loading={loading} onEdit={(invoice: Invoice) => { setSelectedEdit(invoice); setShowEditDialog(true) }} onDelete={handleDelete} onPreview={(invoice: Invoice) => navigate(`/invoices/${invoice.id}`)} />
 
-      <CreateInvoiceForm
-        onSave={refetchInvoices}
-        show={showCreateDialog}
-        hide={()=>setShowCreateDialog(false)}
-      />
-      
-      <EditInvoiceForm
-        invoice={selectedEdit}
-        onSave={refetchInvoices}
-        show={!!(showEditDialog&&selectedEdit)}
-        hide={()=>setShowCreateDialog(false)}
-      />
+      <NavigationControl pageCount={pagination.page} maxPages={maxPages} modifyPagination={modifyPagination} />
 
-      {/* 
-      <MaterialPriceModal
-      open={showMaterialCostModal}
-      onClose={()=>setShowMaterialCostModal(false)}
-      getMaterialSupplierCosts={getSupplierMaterialCosts}
-      getMaterialSupplierInvoices={getSupplierMaterialInvoices}
-      /> */}
+      <CreateInvoiceForm onSave={refetchInvoices} open={showCreateDialog} hide={() => setShowCreateDialog(false)} />
 
-    </Container>
+      <EditInvoiceForm invoice={selectedEdit} onSave={refetchInvoices} open={!!(showEditDialog && selectedEdit)} hide={() => setShowCreateDialog(false)} />
+    </div>
   )
 }
 

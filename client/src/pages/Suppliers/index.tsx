@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Container, IconButton } from '@mui/material'
+import React from 'react'
 import { FiEye } from 'react-icons/fi'
 import { useSuppliers } from '../../hooks/useSuppliers'
 import { PageHeader, FormDialog, DataTable } from '../../components/common'
@@ -96,20 +96,15 @@ const SuppliersPage = () => {
     {
       field: 'materials_count',
       label: 'المواد المزودة',
-      render: (_: any, row: Supplier) => {
-        const suppliersCount = row.materials?.length || 0
-        return (
-          <IconButton
-            size="small"
-            onClick={() => handlePreview(row)}
-            sx={{ color: '#7b1fa2', gap: '0.5rem'}}
-            title={`عرض ${suppliersCount} مورد`}
-            >
-            <FiEye />
-            <p className='text-xs'>{`${suppliersCount||'0'} خامات`}</p>
-          </IconButton>
-        )
-      },
+        render: (_: any, row: Supplier) => {
+          const suppliersCount = row.materials?.length || 0
+          return (
+            <button onClick={() => handlePreview(row)} className="flex items-center gap-2 text-purple-600">
+              <FiEye />
+              <span className='text-xs'>{`${suppliersCount || '0'} خامات`}</span>
+            </button>
+          )
+        },
       align: 'center' as const
     }
   ]
@@ -122,7 +117,7 @@ const SuppliersPage = () => {
   ]
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="max-w-screen-lg mx-auto py-4">
       <PageHeader
         title={PAGE_HEADERS.suppliers.title}
         subtitle={PAGE_HEADERS.suppliers.subtitle}
@@ -181,7 +176,7 @@ const SuppliersPage = () => {
         }}
       />
       
-    </Container>
+    </div>
   )
 }
 

@@ -1,9 +1,5 @@
 import { useNavigate } from 'react-router'
-import {
-  Container,
-  Box,
-  Typography
-} from '@mui/material'
+import React from 'react'
 import { useSuppliers } from '../../hooks/useSuppliers'
 import { useMaterials } from '../../hooks/useMaterials'
 import { useTransactions } from '../../hooks/useTransactions'
@@ -14,6 +10,9 @@ import MaterialTable from './MaterialTable'
 import SupplierTable from './SupplierTable'
 import InvoiceTable from './InvoiceTable'
 import { useInvoices } from '../../hooks/useInvoices'
+import { RiBillLine, RiCashLine } from 'react-icons/ri'
+import { MdPeople } from 'react-icons/md'
+import { LuContainer } from 'react-icons/lu'
 
 const HomePage = () => {
   const navigate = useNavigate()
@@ -22,82 +21,56 @@ const HomePage = () => {
   const { transactions, total: transactionsTotal, loading: transactionsLoading, detailedCosts } = useTransactions()
   const { invoices, total: invoicesTotal, loading: invoicesLoading } = useInvoices({autoRefetch:true})
 
+  const stats =[
+    {
+      value:suppliersTotal,
+      label:"الموردون",
+      loading:suppliersLoading,
+      icon:<MdPeople/>
+    },
+    {
+      value:materialsTotal,
+      label:"المواد",
+      loading:materialsLoading,
+      icon:<LuContainer/>
+    },
+    {
+      value:invoicesTotal,
+      label:"الفواتير",
+      loading:invoicesLoading,
+      icon:<RiBillLine/>
+    },
+    {
+      value:formatCurrency(detailedCosts.total),
+      label:"إجمالي التكاليف",
+      loading:transactionsLoading,
+      icon:<RiCashLine/>
+    }
+  ]
+
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="max-w-screen-lg mx-auto py-4">
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-          لوحة التحكم
-        </Typography>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          نظرة عامة على الموردين والمواد والفواتير
-        </Typography>
-      </Box>
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold mb-1">لوحة التحكم</h1>
+        <p className="text-sm text-gray-500">نظرة عامة على الموردين والمواد والفواتير</p>
+      </div>
 
       {/* Stats Overview */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 3, mb: 4 }}>
-        <StatsCard
-          value={suppliersTotal}
-          label="الموردون"
-          backgroundColor="#e3f2fd"
-          textColor="#1976d2"
-          captionColor="#1565c0"
-          loading={suppliersLoading}
-        />
-        <StatsCard
-          value={materialsTotal}
-          label="المواد"
-          backgroundColor="#f3e5f5"
-          textColor="#7b1fa2"
-          captionColor="#6a1b9a"
-          loading={materialsLoading}
-        />
-        <StatsCard
-          value={invoicesTotal}
-          label="الفواتير"
-          backgroundColor="#fff3e0"
-          textColor="#f57c00"
-          captionColor="#e65100"
-          loading={invoicesLoading}
-        />
-        <StatsCard
-          value={formatCurrency(detailedCosts.total)}
-          label="إجمالي التكاليف"
-          backgroundColor="#e8f5e9"
-          textColor="#388e3c"
-          captionColor="#2e7d32"
-          loading={transactionsLoading}
-        />
-      </Box>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        {stats.map((stat, i) => (
+          <StatsCard key={i} value={stat.value} label={stat.label} loading={stat.loading} icon={stat.icon} />
+        ))}
+      </div>
 
       {/* Tables */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 3 }}>
-        <InvoiceTable
-          data={invoices}
-          total={invoicesTotal}
-          loading={invoicesLoading}
-          onViewMore={() => navigate('/invoices')}
-        />
-        <SupplierTable
-          data={suppliers}
-          total={suppliersTotal}
-          loading={suppliersLoading}
-          onViewMore={() => navigate('/suppliers')}
-        />
-        <MaterialTable
-          data={materials}
-          total={materialsTotal}
-          loading={materialsLoading}
-          onViewMore={() => navigate('/materials')}
-        />
-        <TransactionTable
-          data={transactions}
-          total={transactionsTotal}
-          loading={transactionsLoading}
-          onViewMore={() => navigate('/transactions')}
-        />
-      </Box>
-    </Container>
+      <div className="grid grid-cols-1 gap-3">
+        <InvoiceTable data={invoices} total={invoicesTotal} loading={invoicesLoading} onViewMore={() => navigate('/invoices')} />
+        <SupplierTable data={suppliers} total={suppliersTotal} loading={suppliersLoading} onViewMore={() => navigate('/suppliers')} />
+        <MaterialTable data={materials} total={materialsTotal} loading={materialsLoading} onViewMore={() => navigate('/materials')} />
+        <TransactionTable data={transactions} total={transactionsTotal} loading={transactionsLoading} onViewMore={() => navigate('/transactions')} />
+      </div>
+    </div>
   )
 }
 

@@ -7,13 +7,13 @@ import type { Invoice } from '../../types'
 import { modifyInvoice } from '../../services/invoices.service'
 
 interface Props{
-    show: boolean
+    open: boolean
     hide: ()=>void
     onSave: ()=>void
     invoice?: Invoice|null
 }
 
-const EditInvoiceForm:React.FC<Props> = ({show, hide, onSave, invoice}) => {
+const EditInvoiceForm:React.FC<Props> = ({open, hide, onSave, invoice}) => {
     const { suppliers} = useSuppliers(true)
     const [isLoading, setIsLoading] = useState(false)
 
@@ -33,7 +33,7 @@ const EditInvoiceForm:React.FC<Props> = ({show, hide, onSave, invoice}) => {
             paid: invoice?.paid||0,
             createdAt: invoice?.createdAt || new Date().toISOString().split('T')[0],
         })
-    },[show])
+    },[open])
 
     const formFields = [
         {
@@ -80,9 +80,9 @@ const EditInvoiceForm:React.FC<Props> = ({show, hide, onSave, invoice}) => {
     }
 
 
-  return (
-      <FormDialog
-        open={show}
+    return (
+            <FormDialog
+                open={open}
         title={DIALOG_TITLES.invoice.edit}
         fields={formFields}
         formData={formData}

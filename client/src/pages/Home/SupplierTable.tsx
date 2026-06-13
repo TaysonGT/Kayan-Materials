@@ -1,7 +1,7 @@
-import { Box, Button, Card, CardActions, CardContent, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
+import React from 'react'
 import type { Supplier } from "../../types"
 import { Loader } from "../../components/ui"
-import { FiArrowRight } from "react-icons/fi"
+import { FiArrowLeft } from "react-icons/fi"
 
 interface SupplierTableProps {
     data: Supplier[]
@@ -11,56 +11,51 @@ interface SupplierTableProps {
 }
 
 const SupplierTable: React.FC<SupplierTableProps> = ({ data, total, loading, onViewMore }) => (
-    <Card>
-        <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>الموردون</Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>الإجمالي: {total}</Typography>
-        </Box>
-        <TableContainer component={Paper} sx={{ mb: 2 }}>
-            {
-            loading? (
-            <div className='w-full flex justify-center py-10'>
-                <Loader size={30} thickness={5}/>
+    <div className="shadow-sm border border-[#d9d9d9] rounded-sm bg-white">
+        <div className="p-4">
+            <div className='flex justify-between items-center mb-2'>
+                <div className="font-semibold">الموردون</div>
+                <div className="text-sm text-gray-500">الإجمالي: {total}</div>
             </div>
-            ):
-            <Table size="small">
-            <TableHead>
-                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'right' }}>الاسم</TableCell>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'right' }}>الهاتف الأول</TableCell>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'right' }}>العنوان</TableCell>
-                </TableRow>
-            </TableHead>
-            
-                <TableBody>
-                {
-                data.length === 0 ? (
-                <TableRow>
-                    <TableCell colSpan={3} sx={{ textAlign: 'center', py: 3 }}>
-                    لا يوجد موردون لعرضهم
-                    </TableCell>
-                </TableRow>
+            <div className="mb-2 border border-[#e8e8e8] rounded-sm">
+                {loading ? (
+                    <div className='w-full flex justify-center py-10'>
+                        <Loader size={30} thickness={5} />
+                    </div>
                 ) : (
-                data.slice(0, 4).map((row) => (
-                    <TableRow key={row.id} sx={{ '&:hover': { backgroundColor: '#fafafa' } }}>
-                    <TableCell sx={{textAlign: 'right'}}>{row.name}</TableCell>
-                    <TableCell sx={{textAlign: 'right'}}>{row.phone1}</TableCell>
-                    <TableCell sx={{textAlign: 'right'}}>{row.address || '-'}</TableCell>
-                    </TableRow>
-                ))
+                    <table className="min-w-full">
+                        <thead className="bg-gray-100">
+                            <tr>
+                                <th className="px-4 py-2 font-semibold text-start">الاسم</th>
+                                <th className="px-4 py-2 font-semibold text-start">الهاتف الأول</th>
+                                <th className="px-4 py-2 font-semibold text-start">العنوان</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.length === 0 ? (
+                                <tr>
+                                    <td colSpan={3} className="text-center py-3">لا يوجد موردون لعرضهم</td>
+                                </tr>
+                            ) : (
+                                data.slice(0, 4).map((row) => (
+                                    <tr key={row.id} className="hover:bg-gray-50">
+                                        <td className="px-4 py-2">{row.name}</td>
+                                        <td className="px-4 py-2">{row.phone1}</td>
+                                        <td className="px-4 py-2">{row.address || '-'}</td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 )}
-            </TableBody>
-            </Table>
-            }
-        </TableContainer>
-        </CardContent>
-        <CardActions dir='ltr'>
-        <Button onClick={onViewMore} sx={{ ml: 'auto' }} endIcon={<FiArrowRight />}>
-            عرض الكل والإدارة
-        </Button>
-        </CardActions>
-    </Card>
+            </div>
+        </div>
+        <div className="p-3 flex justify-end">
+            <button onClick={onViewMore} className="flex items-center gap-2 px-3 py-2 bg-transparent text-blue-600 hover:underline cursor-pointer">
+                عرض الكل والإدارة <FiArrowLeft />
+            </button>
+        </div>
+    </div>
 )
 
 export default SupplierTable

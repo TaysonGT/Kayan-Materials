@@ -7,12 +7,12 @@ import { useNavigate } from 'react-router'
 import { newInvoice } from '../../services/invoices.service'
 
 interface Props{
-    show: boolean
-    hide: ()=>void
-    onSave: ()=>void
+  open: boolean
+  hide: ()=>void
+  onSave: ()=>void
 }
 
-const CreateInvoiceForm:React.FC<Props> = ({show, hide}) => {
+const CreateInvoiceForm:React.FC<Props> = ({open, hide}) => {
     const { suppliers} = useSuppliers(true)
     const [isLoading, setIsLoading] = useState(false)
     
@@ -34,7 +34,7 @@ const CreateInvoiceForm:React.FC<Props> = ({show, hide}) => {
             paid: 0,
             createdAt: new Date().toISOString().split('T')[0]
         })
-    },[show])
+    },[open])
 
     const formFields = [
         {
@@ -83,7 +83,7 @@ const CreateInvoiceForm:React.FC<Props> = ({show, hide}) => {
 
   return (
       <FormDialog
-        open={show}
+        open={open}
         title={DIALOG_TITLES.invoice.add}
         fields={formFields}
         formData={formData}

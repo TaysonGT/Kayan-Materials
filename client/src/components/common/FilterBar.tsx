@@ -1,5 +1,4 @@
 import React from 'react'
-import { Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material'
 
 interface FilterOption {
   value: string
@@ -15,22 +14,14 @@ interface FilterBarProps {
 
 const FilterBar: React.FC<FilterBarProps> = ({ label, value, options, onChange }) => {
   return (
-    <Box sx={{ mb: 3 }}>
-      <FormControl sx={{ minWidth: 200 }}>
-        <InputLabel>{label}</InputLabel>
-        <Select
-          value={value}
-          label={label}
-          onChange={(e) => onChange(e.target.value)}
-        >
-          {options.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Box>
+    <div className="mb-3">
+      <label className="block text-sm mb-1">{label}</label>
+      <select className="min-w-[200px] border rounded px-3 py-2" value={value} onChange={(e)=>onChange(e.target.value)}>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>{option.label}</option>
+        ))}
+      </select>
+    </div>
   )
 }
 

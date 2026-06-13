@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Container, IconButton } from '@mui/material'
+import React from 'react'
 import { FiEye } from 'react-icons/fi'
 import { useMaterials } from '../../hooks/useMaterials'
 import { PageHeader, FormDialog, DataTable } from '../../components/common'
@@ -89,15 +89,10 @@ const MaterialsPage = () => {
       render: (_: any, row: Material) => {
         const suppliersCount = row.suppliers?.length || 0
         return (
-          <IconButton
-            size="small"
-            onClick={() => handlePreview(row)}
-            sx={{ color: '#7b1fa2', gap: '0.5rem'}}
-            title={`عرض ${suppliersCount} مورد`}
-            >
+          <button onClick={() => handlePreview(row)} className="flex items-center gap-2 text-purple-600">
             <FiEye />
-            <p className='text-xs'>{`${suppliersCount||'0'} مورد`}</p>
-          </IconButton>
+            <span className='text-xs'>{`${suppliersCount || '0'} مورد`}</span>
+          </button>
         )
       },
       align: 'center' as const
@@ -116,7 +111,7 @@ const MaterialsPage = () => {
   ]
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="max-w-screen-lg mx-auto py-4">
       <PageHeader
         title={PAGE_HEADERS.materials.title}
         subtitle={PAGE_HEADERS.materials.subtitle}
@@ -167,7 +162,7 @@ const MaterialsPage = () => {
         }}
         onClose={()=>setShowAddSupplierToMaterialDialog(false)}
         />
-    </Container>
+    </div>
   )
 }
 

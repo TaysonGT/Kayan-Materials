@@ -1,5 +1,4 @@
 import React from 'react'
-import { Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material'
 
 interface FilterOption {
   value?: string
@@ -18,27 +17,19 @@ interface FiltersBarProps {
 }
 const FiltersBar:React.FC<FiltersBarProps> = ({filters}) => {
   return (
-    <Box sx={{ mb: 3, display: 'flex', gap: '1rem' }}>
-      {filters.map((filter)=>
-            <FormControl key={filter.label} sx={{ minWidth: 200 }}>
-            <InputLabel>{filter.label}</InputLabel>
-            <Select
-                value={filter.value||''}
-                label={filter.label}
-                onChange={(e) => filter.onChange(e.target.value)}
-            >
-                <MenuItem key={'all'} value={undefined}>
-                    الكل
-                </MenuItem>
-                {filter.options.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                    </MenuItem>
-                ))}
-            </Select>
-            </FormControl>
-        )}
-    </Box>
+    <div className="mb-3 flex gap-4">
+      {filters.map((filter) => (
+        <div key={filter.label} className="min-w-[200px]">
+          <label className="block text-sm mb-1">{filter.label}</label>
+          <select className="w-full border rounded px-3 py-2 bg-white" value={filter.value as any || ''} onChange={(e)=>filter.onChange(e.target.value)}>
+            <option value={""}>{'الكل'}</option>
+            {filter.options.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </div>
+      ))}
+    </div>
   )
 }
 

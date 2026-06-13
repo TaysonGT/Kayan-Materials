@@ -8,14 +8,14 @@ import { useMaterials } from '../../hooks/useMaterials'
 import { patchTransaction } from '../../api/transactions'
 
 interface Props{
-    show: boolean
+    open: boolean
     hide: ()=>void
     onSave: ()=>void
     transaction: Transaction|null
     invoice?: Invoice
 }
 
-const EditTransactionForm:React.FC<Props> = ({show, hide, onSave, transaction, invoice}) => {
+const EditTransactionForm:React.FC<Props> = ({open, hide, onSave, transaction, invoice}) => {
     const { materials } = useMaterials({all:true})
     const [isLoading, setIsLoading] = useState(false)
 
@@ -39,7 +39,7 @@ const EditTransactionForm:React.FC<Props> = ({show, hide, onSave, transaction, i
                 received_date: formatDateInput(transaction.received_date),
             })
         }
-    },[transaction, show])
+    },[transaction, open])
 
 
     const formFields = [
@@ -95,8 +95,8 @@ const EditTransactionForm:React.FC<Props> = ({show, hide, onSave, transaction, i
 
   return (
     
-      <FormDialog
-        open={show}
+            <FormDialog
+                open={open}
         title={DIALOG_TITLES.transaction.edit}
         fields={formFields}
         formData={formData}

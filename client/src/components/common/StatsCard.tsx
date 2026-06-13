@@ -1,51 +1,33 @@
 import React from 'react'
-import { Box, Typography } from '@mui/material'
 import { Loader } from '../ui'
 
 interface StatsCardProps {
   value: string | number
   label: string
-  backgroundColor: string
-  textColor: string
-  captionColor: string
   loading: boolean
+  icon?: React.ReactNode
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({
   value,
   label,
-  backgroundColor,
-  textColor,
-  captionColor,
-  loading
+  loading,
+  icon
 }) => {
   return (
-    <Box
-      sx={{
-        p: 2,
-        backgroundColor,
-        borderRadius: 2,
-        textAlign: 'center'
-      }}
-    >
-      {loading?
-        <Box sx={{display:'flex', justifyContent: 'center',py:1}}>
-          <Loader size={20} thickness={4}/>
-        </Box>
-        :<Typography
-          variant="h6"
-          sx={{ fontWeight: 700, color: textColor }}
-        >
-          {value}
-        </Typography>
-      }
-      <Typography
-        variant="caption"
-        sx={{ color: captionColor }}
-      >
-        {label}
-      </Typography>
-    </Box>
+    <div className="rounded p-4 flex flex-col gap-2 bg-white shadow-sm">
+      <div className="flex items-center justify-between gap-2 text-[#7f7f7f] font-bold">
+        <div className="text-base font-extrabold">{label}</div>
+        <span className='text-xl p-1 bg-[#f7f7f7] rounded-lg border border-[#d3d3d3]'>{icon}</span>
+      </div>
+      {loading ? (
+        <div className="flex justify-center py-3">
+          <Loader size={20} thickness={4} />
+        </div>
+      ) : (
+        <div className="text-black p-2 text-2xl font-bold">{value}</div>
+      )}
+    </div>
   )
 }
 

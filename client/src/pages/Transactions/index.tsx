@@ -1,4 +1,4 @@
-import { Container, Box, Chip, Button } from '@mui/material'
+import React from 'react'
 import { useTransactions } from '../../hooks/useTransactions'
 import { PageHeader, DataTable, StatsCard } from '../../components/common'
 import type { Invoice, Material, Transaction } from '../../types'
@@ -95,13 +95,8 @@ const TransactionsPage = () => {
       field: 'status',
       label: 'الحالة',
       render: (value: any) => (
-        <Chip
-          label={value==='received' ? 'مسلم' : 'معلق'}
-          color={value==='received' ? 'success' : 'warning'}
-          variant="outlined"
-          size="small"
-        />
-      ),
+          <span className={`inline-block px-2 py-1 text-sm rounded ${value === 'received' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-800'}`}>{value === 'received' ? 'مسلم' : 'معلق'}</span>
+        ),
       align: 'center' as const
     },
     {
@@ -113,7 +108,7 @@ const TransactionsPage = () => {
   ]
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="max-w-screen-lg mx-auto py-4">
       <PageHeader
         title={PAGE_HEADERS.transactions.title}
         subtitle={PAGE_HEADERS.transactions.subtitle}
@@ -123,43 +118,19 @@ const TransactionsPage = () => {
       />
 
       {/* Stats */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 2, mb: 3 }}>
-        <StatsCard
-          value={formatCurrency(detailedCosts.receivedCosts)}
-          label="الحركات المسلمة"
-          backgroundColor="#e8f5e9"
-          textColor="#388e3c"
-          captionColor="#2e7d32"
-          loading={loading}
-        />
-        <StatsCard
-          value={formatCurrency(detailedCosts.notReceivedCosts)}
-          label="الحركات المعلقة"
-          backgroundColor="#fff3e0"
-          textColor="#f57c00"
-          captionColor="#e65100"
-          loading={loading}
-        />
-        <StatsCard
-          value={transactions.length}
-          label="إجمالي الحركات"
-          backgroundColor="#f3e5f5"
-          textColor="#7b1fa2"
-          captionColor="#6a1b9a"
-          loading={loading}
-        />
-      </Box>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+        <StatsCard value={formatCurrency(detailedCosts.receivedCosts)} label="الحركات المسلمة" loading={loading} />
+        <StatsCard value={formatCurrency(detailedCosts.notReceivedCosts)} label="الحركات المعلقة" loading={loading} />
+        <StatsCard value={transactions.length} label="إجمالي الحركات" loading={loading} />
+      </div>
       
-      <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'start'}}>
-        <FiltersBar filters={filters}/>
-        <Button
-          dir='ltr'
-          variant="contained"
-          startIcon={<FiEye />}
-          onClick={()=>setShowMaterialCostModal(true)}>
+      <div className="flex justify-between items-start">
+        <FiltersBar filters={filters} />
+        <button onClick={() => setShowMaterialCostModal(true)} className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded">
+          <FiEye />
           متوسط سعر الخام
-        </Button>
-      </Box>
+        </button>
+      </div>
 
       <DataTable
         columns={tableColumns}
@@ -198,7 +169,7 @@ const TransactionsPage = () => {
       getMaterialSupplierTransactions={getSupplierMaterialTransactions}
       />
 
-    </Container>
+    </div>
   )
 }
 

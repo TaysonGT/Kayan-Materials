@@ -1,4 +1,3 @@
-import { Box, Button, Chip, Dialog, DialogContent, DialogTitle, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useSuppliers } from '../../hooks/useSuppliers'
 import { type Transaction, type Material, type Supplier, type Invoice } from '../../types'
@@ -158,12 +157,7 @@ const MaterialAverageCost:React.FC<Props> = ({open, onClose, getMaterialSupplier
           field: 'status',
           label: 'الحالة',
           render: (value: any) => (
-            <Chip
-              label={value==='received' ? 'مسلم' : 'معلق'}
-              color={value==='received' ? 'success' : 'warning'}
-              variant="outlined"
-              size="small"
-            />
+            <span className={`inline-block px-2 py-1 text-sm rounded ${value === 'received' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-800'}`}>{value === 'received' ? 'مسلم' : 'معلق'}</span>
           ),
           align: 'center' as const
         }
@@ -197,70 +191,39 @@ const MaterialAverageCost:React.FC<Props> = ({open, onClose, getMaterialSupplier
     },[selectedSupplier])
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-        <DialogTitle>متوسط سعر الخام</DialogTitle>
-        <DialogContent sx={{ pt: 8, display: 'flex', flexDirection: 'column'}}>
-            <Box sx={{display:'flex', alignItems: 'start', pt:1, gap:2}}>
-                <FiltersBar filters={filters}/>
-                <Button onClick={calculate} variant="contained" size='large' disabled={loading}>
-                    {loading ? 'جاري...' : 'حساب'}
-                </Button>
-                <Button onClick={reset} variant="outlined" color='error' size='large'>
-                    إعادة
-                </Button>
-            </Box>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 2, mb: 3 }}>
-                <StatsCard
-                value={costInfo?.materialUnitCount||0}
-                label="عدد الوحدات"
-                backgroundColor="#e3f2fd"
-                textColor="#1976d2"
-                captionColor="#1565c0"
-                loading={loading}
-                />
-                <StatsCard
-                value={formatCurrency(costInfo?.averageCost||0)}
-                label="متوسط سعر الوحدة"
-                backgroundColor="#e8f5e9"
-                textColor="#388e3c"
-                captionColor="#2e7d32"
-                loading={loading}
-                />
-                <StatsCard
-                value={formatCurrency(costInfo?.materialTotal||0)}
-                label="إجمالي الخام"
-                backgroundColor="#fff3e0"
-                textColor="#f57c00"
-                captionColor="#e65100"
-                loading={loading}
-                />
-                <StatsCard
-                value={formatCurrency(costInfo?.freightTotal||0)}
-                label="إجمالي النولون"
-                backgroundColor="#f3e5f5"
-                textColor="#7b1fa2"
-                captionColor="#6a1b9a"
-                loading={loading}
-                />
-                
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>الحركات الأخيرة</Typography>
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>الإجمالي: {total}</Typography>
-            </Box>
-            <DataTable
-              withAcitons={false}
-              columns={tableColumns}
-              rows={transactions}
-              loading={loading}
-            />
-            <NavigationControl 
-            maxPages={maxPages}
-            pageCount={pagination.page}
-            modifyPagination={modifyPagination}
-            />
-        </DialogContent>
-    </Dialog>
+    <>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/40" onClick={onClose} />
+          <div className="bg-white rounded shadow-lg max-w-4xl w-full p-6 z-10">
+            <div className="text-lg font-bold mb-4">متوسط سعر الخام</div>
+
+            <div className="flex items-start gap-2 pt-1">
+              <FiltersBar filters={filters} />
+              <div className="flex items-center gap-2">
+                <button onClick={calculate} disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded">{loading ? 'جاري...' : 'حساب'}</button>
+                <button onClick={reset} className="px-4 py-2 border rounded text-red-600">إعادة</button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-3 mt-4">
+              <StatsCard value={costInfo?.materialUnitCount || 0} label="عدد الوحدات" loading={loading} />
+              <StatsCard value={formatCurrency(costInfo?.averageCost || 0)} label="متوسط سعر الوحدة" loading={loading} />
+              <StatsCard value={formatCurrency(costInfo?.materialTotal || 0)} label="إجمالي الخام" loading={loading} />
+              <StatsCard value={formatCurrency(costInfo?.freightTotal || 0)} label="إجمالي النولون" loading={loading} />
+            </div>
+
+            <div className="flex justify-between items-center mb-2">
+              <div className="text-lg font-semibold">الحركات الأخيرة</div>
+              <div className="text-sm text-gray-500">الإجمالي: {total}</div>
+            </div>
+
+            <DataTable withAcitons={false} columns={tableColumns} rows={transactions} loading={loading} />
+            <NavigationControl maxPages={maxPages} pageCount={pagination.page} modifyPagination={modifyPagination} />
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

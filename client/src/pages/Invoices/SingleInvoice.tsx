@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Container, Box, Chip, IconButton, Typography, TextField, Button } from '@mui/material'
+import React from 'react'
 import { FiArrowRight } from 'react-icons/fi';
 import { useNavigate, useParams } from 'react-router';
 import { DataTable } from '../../components/common';
@@ -80,12 +80,7 @@ const SingleInvoicePage = () => {
         field: 'status',
         label: 'الحالة',
         render: (value: any) => (
-          <Chip
-            label={value==='received' ? 'مسلم' : 'معلق'}
-            color={value==='received' ? 'success' : 'warning'}
-            variant="outlined"
-            size="small"
-          />
+          <span className={`inline-block px-2 py-1 text-sm rounded ${value === 'received' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-800'}`}>{value === 'received' ? 'مسلم' : 'معلق'}</span>
         ),
         align: 'center' as const
       },
@@ -103,101 +98,58 @@ const SingleInvoicePage = () => {
   },[invoiceId])
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <IconButton onClick={() => navigate('/invoices')} size="small">
-          <FiArrowRight />
-        </IconButton>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
-            عرض فاتورة
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            تفاصيل الفاتورة وعناصرها
-          </Typography>
-        </Box>
-      </Box>
-      <Box sx={{ pt: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField 
-                aria-readonly
-                focused={false}
-                label={'المورد'}
-                value={invoice?.supplier?.name||'لم يتم تحديد المورد'}
-            />
-            <TextField 
-                aria-readonly
-                focused={false}
-                label={'التاريخ'}
-                value={formatDateDisplay(invoice?.createdAt||0)}
-            />
-            <TextField 
-                aria-readonly
-                focused={false}
-                label={'الوصف'}
-                value={invoice?.description||'-'}
-            />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField 
-                aria-readonly
-                focused={false}
-                label={'القيمة المدفوعة'}
-                value={formatCurrency(invoice?.paid||0)}
-            />
-            <TextField 
-                aria-readonly
-                focused={false}
-                label={'النولون'}
-                value={formatCurrency(invoice?.freight||0)}
-            />
-            <TextField 
-                aria-readonly
-                focused={false}
-                label={'الإجمالي'}
-                value={formatCurrency(invoice?.total||0)}
-            />
-        </Box>
-      </Box>
-      <Box sx={{mt: 4}}>
-        <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
-            <Typography variant='h6' fontWeight={600}>
-                عناصر الفاتورة
-            </Typography>
-            <Button onClick={()=>setShowAddDialog(true)} variant='contained' color='primary'>
-                إضافة عنصر
-            </Button>
-        </Box>
-        <Box sx={{mt: 2}}>    
-            <DataTable
-                columns={transactionsTableColumns}
-                rows={invoice?.transactions||[]}
-                loading={loading}
-                onEdit={(transaction: Transaction)=>{
-                    setSelectedEdit(transaction);
-                    setShowEditDialog(true)}
-                }
-                onDelete={handleDelete}
-            />
-        </Box>
-      </Box>
+    <div className="max-w-screen-lg mx-auto py-4">
+      <div className="flex items-center gap-2">
+        <button onClick={() => navigate('/invoices')} className="p-1 rounded text-gray-700 hover:bg-gray-200"><FiArrowRight /></button>
+        <div>
+          <h1 className="text-2xl font-bold">عرض فاتورة</h1>
+          <p className="text-sm text-gray-500">تفاصيل الفاتورة وعناصرها</p>
+        </div>
+      </div>
+      <div className="pt-4 flex flex-col gap-2">
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <label className="block text-sm mb-1">المورد</label>
+            <div className="border rounded px-3 py-2">{invoice?.supplier?.name || 'لم يتم تحديد المورد'}</div>
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm mb-1">التاريخ</label>
+            <div className="border rounded px-3 py-2">{formatDateDisplay(invoice?.createdAt || 0)}</div>
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm mb-1">الوصف</label>
+            <div className="border rounded px-3 py-2">{invoice?.description || '-'}</div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <label className="block text-sm mb-1">القيمة المدفوعة</label>
+            <div className="border rounded px-3 py-2">{formatCurrency(invoice?.paid || 0)}</div>
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm mb-1">النولون</label>
+            <div className="border rounded px-3 py-2">{formatCurrency(invoice?.freight || 0)}</div>
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm mb-1">الإجمالي</label>
+            <div className="border rounded px-3 py-2">{formatCurrency(invoice?.total || 0)}</div>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4">
+        <div className="flex justify-between">
+          <div className='text-lg font-semibold'>عناصر الفاتورة</div>
+          <button onClick={() => setShowAddDialog(true)} className="px-3 py-2 bg-blue-600 text-white rounded">إضافة عنصر</button>
+        </div>
+        <div className="mt-2">
+          <DataTable columns={transactionsTableColumns} rows={invoice?.transactions || []} loading={loading} onEdit={(transaction: Transaction) => { setSelectedEdit(transaction); setShowEditDialog(true) }} onDelete={handleDelete} />
+        </div>
+      </div>
 
-      <CreateTransactionForm 
-        show={showAddDialog} 
-        hide={()=>setShowAddDialog(false)} 
-        invoice={invoice} 
-        onSave={loadInvoice}
-      />
-      
-      <EditTransactionForm 
-        show={showEditDialog} 
-        hide={()=>setShowEditDialog(false)} 
-        transaction={selectedEdit} 
-        invoice={invoice}
-        onSave={loadInvoice}
-      />
+      <CreateTransactionForm open={showAddDialog} hide={() => setShowAddDialog(false)} invoice={invoice} onSave={loadInvoice} />
+      <EditTransactionForm open={showEditDialog} hide={() => setShowEditDialog(false)} transaction={selectedEdit} invoice={invoice} onSave={loadInvoice} />
 
-    </Container>
+    </div>
   )
 }
 

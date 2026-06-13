@@ -1,5 +1,4 @@
 import React from 'react'
-import { Box, Typography, Button, IconButton } from '@mui/material'
 import { FiPlus, FiArrowRight } from 'react-icons/fi'
 import { useNavigate } from 'react-router'
 
@@ -19,29 +18,24 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   const navigate = useNavigate()
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <IconButton onClick={() => navigate('/')} size="small">
+    <div className="flex justify-between items-center mb-3">
+      <div className="flex items-center gap-2">
+        <button onClick={() => navigate('/')} className="p-1 rounded text-gray-700 hover:bg-gray-200">
           <FiArrowRight />
-        </IconButton>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
-            {title}
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            {subtitle}
-          </Typography>
-        </Box>
-      </Box>
-      <Button
-        dir='ltr'
-        variant="contained"
-        startIcon={<FiPlus />}
+        </button>
+        <div>
+          <h4 className="text-2xl font-bold">{title}</h4>
+          <p className="text-sm text-gray-500">{subtitle}</p>
+        </div>
+      </div>
+      <button
+        className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-700"
         onClick={onAddClick}
       >
-        {buttonText}
-      </Button>
-    </Box>
+        <FiPlus />
+        <span>{buttonText}</span>
+      </button>
+    </div>
   )
 }
 

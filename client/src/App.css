@@ -25,6 +25,7 @@
 
 body{
     font-family: sans-serif;
+    background-color: #f7f7f7;
 }
 
 .view_more::before {

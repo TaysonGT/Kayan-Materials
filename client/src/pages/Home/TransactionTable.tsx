@@ -1,8 +1,8 @@
-import { Box, Button, Card, CardActions, CardContent, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
+import React from 'react'
 import { Loader } from "../../components/ui"
 import type { Transaction } from "../../types"
 import { formatCurrency } from "../../utils/helpers"
-import { FiArrowRight } from "react-icons/fi"
+import { FiArrowLeft } from "react-icons/fi"
 
 export interface TransactionTableProps {
 data: Transaction[]
@@ -12,77 +12,63 @@ onViewMore: () => void
 }
 
 const TransactionTable: React.FC<TransactionTableProps> = ({ data, total, onViewMore, loading }) => (
-    <Card>
-        <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>الحركات الأخيرة</Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>الإجمالي: {total}</Typography>
-        </Box>
-        <TableContainer component={Paper} sx={{ mb: 2 }}>
-            {
-            loading? (
-            <div className='w-full flex justify-center py-10'>
-                <Loader size={30} thickness={5}/>
+    <div className="shadow-sm border border-[#d9d9d9] rounded-sm bg-white">
+        <div className="p-4">
+            <div className='flex justify-between items-center mb-2'>
+                <div className="font-semibold">الحركات الأخيرة</div>
+                <div className="text-sm text-gray-500">الإجمالي: {total}</div>
             </div>
-            ):
-            <Table size="small">
-            <TableHead>
-                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'right' }}>رقم</TableCell>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'right' }}>المورد</TableCell>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'right' }}>المادة</TableCell>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>الحالة</TableCell>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>الكمية</TableCell>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>سعر الوحدة</TableCell>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>الإجمالي</TableCell>
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {
-                data.length === 0 ? (
-                <TableRow>
-                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 3 }}>
-                    لا توجد حركات لعرضها
-                    </TableCell>
-                </TableRow>
-                ) :
-                data.slice(0, 4).map((row) => (
-                <TableRow key={row.id} sx={{ '&:hover': { backgroundColor: '#fafafa' } }}>
-                    <TableCell sx={{textAlign: 'right'}}>#{row.id}</TableCell>
-                    <TableCell sx={{textAlign: 'right'}}>{row.invoice?.supplier?.name}</TableCell>
-                    <TableCell sx={{textAlign: 'right'}}>{row.material?.name}</TableCell>
-                    <TableCell sx={{textAlign: 'center'}}>
-                    <Box
-                        sx={{
-                        display: 'inline-block',
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: '4px',
-                        backgroundColor: row.status==='received' ? '#4caf5020' : '#2196f320',
-                        color: row.status==='received' ? '#4caf50' : '#2196f3',
-                        fontSize: '0.85rem',
-                        fontWeight: 500
-                        }}
-                    >
-                        {row.status==='received' ? 'تم الاستلام' : 'لم يتم الاستلام'}
-                    </Box>
-                    </TableCell>
-                    <TableCell sx={{textAlign: 'center'}}>{row.quantity.toLocaleString('ar-EG')}</TableCell>
-                    <TableCell sx={{textAlign: 'center'}}>{formatCurrency(row.unitPrice)}</TableCell>
-                    <TableCell sx={{textAlign: 'center'}}>{formatCurrency(row.total||0)}</TableCell>
-                </TableRow>
-                ))}
-            </TableBody>
-            </Table>
-            }
-        </TableContainer>
-        </CardContent>
-        <CardActions dir='ltr'>
-        <Button onClick={onViewMore} sx={{ ml: 'auto' }} endIcon={<FiArrowRight />}>
-            عرض الكل والإدارة
-        </Button>
-        </CardActions>
-    </Card>
+            <div className="mb-2 border border-[#e8e8e8] rounded-sm">
+                {loading ? (
+                    <div className='w-full flex justify-center py-10'>
+                        <Loader size={30} thickness={5} />
+                    </div>
+                ) : (
+                    <table className="min-w-full">
+                        <thead className="bg-gray-100">
+                            <tr>
+                                <th className="px-4 py-2 font-semibold text-right">رقم</th>
+                                <th className="px-4 py-2 font-semibold text-right">المورد</th>
+                                <th className="px-4 py-2 font-semibold text-right">المادة</th>
+                                <th className="px-4 py-2 font-semibold text-center">الحالة</th>
+                                <th className="px-4 py-2 font-semibold text-center">الكمية</th>
+                                <th className="px-4 py-2 font-semibold text-center">سعر الوحدة</th>
+                                <th className="px-4 py-2 font-semibold text-center">الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="text-center py-3">لا توجد حركات لعرضها</td>
+                                </tr>
+                            ) : (
+                                data.slice(0, 4).map((row) => (
+                                    <tr key={row.id} className="hover:bg-gray-50">
+                                        <td className="px-4 py-2 text-right">#{row.id}</td>
+                                        <td className="px-4 py-2 text-right">{row.invoice?.supplier?.name}</td>
+                                        <td className="px-4 py-2 text-right">{row.material?.name}</td>
+                                        <td className="px-4 py-2 text-center">
+                                            <span className={`inline-block px-2 py-1 rounded text-sm font-medium ${row.status === 'received' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+                                                {row.status === 'received' ? 'تم الاستلام' : 'لم يتم الاستلام'}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-2 text-center">{row.quantity.toLocaleString('ar-EG')}</td>
+                                        <td className="px-4 py-2 text-center">{formatCurrency(row.unitPrice)}</td>
+                                        <td className="px-4 py-2 text-center">{formatCurrency(row.total || 0)}</td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                )}
+            </div>
+        </div>
+        <div className="p-3 flex justify-end">
+            <button onClick={onViewMore} className="flex items-center gap-2 px-3 py-2 bg-transparent text-blue-600 hover:underline cursor-pointer">
+                عرض الكل والإدارة <FiArrowLeft />
+            </button>
+        </div>
+    </div>
 )
 
 export default TransactionTable;

@@ -1,19 +1,4 @@
 import React from 'react'
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Checkbox,
-  FormControlLabel
-} from '@mui/material'
 
 interface FormField {
   name: string
@@ -52,133 +37,146 @@ const FormDialog: React.FC<FormDialogProps> = ({
   isLoading = false
 }) => {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 2, pt: 0.75 }}>
-          {fields.map((field) => {
-            if (field.type === 'number') {
-              return (
-                <TextField
-                  key={field.name}
-                  name={field.name}
-                  label={field.label}
-                  type="number"
-                  fullWidth
-                  aria-readonly={field.readOnly}
-                  required={field.required}
-                  value={field.value || formData[field.name] || ''}
-                  onChange={(e) => onChange(field.name, e.target.value)}
-                />
-              )
-            }
-            if (field.type === 'select') {
-              return (
-                <FormControl key={field.name} fullWidth>
-                  <InputLabel>{field.label}</InputLabel>
-                  <Select
-                    name={field.name}
-                    label={field.label}
-                    defaultValue={field.value || formData[field.name] ||  ''}
-                    onChange={(e) => onChange(field.name, e.target.value)}
-                    aria-readonly={field.readOnly}
-                    required={field.required}
-                  >
-                    {field.options?.map((opt) => (
-                      <MenuItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )
-            }
-
-            if (field.type === 'multiselect') {
-              return (
-                <FormControl key={field.name} fullWidth>
-                  <InputLabel>{field.label}</InputLabel>
-                  <Select
-                    multiple
-                    name={field.name}
-                    label={field.label}
-                    value={formData[field.name] || []}
-                    onChange={(e) => onChange(field.name, e.target.value)}
-                    aria-readonly={field.readOnly}
-                    required={field.required}
-                  >
-                    {field.options?.map((opt) => (
-                      <MenuItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )
-            }
-
-            if (field.type === 'date') {
-              return (
-                <TextField
-                  key={field.name}
-                  name={field.name}
-                  label={field.label}
-                  type="date"
-                  fullWidth
-                  aria-readonly={field.readOnly}
-                  required={field.required}
-                  value={formData[field.name] || formData.value}
-                  onChange={(e) => onChange(field.name, e.target.value)}
-                />
-              )
-            }
-
-            if (field.type === 'checkbox') {
-              return (
-                <FormControlLabel 
-                control={
-                  <Checkbox
-                    name={field.name}
-                    value={formData[field.name] || formData.value || []}
-                    onChange={(e) => onChange(field.name, e.target.checked)}
-                    required={field.required}
-                    aria-readonly={field.readOnly}
-                  />
+    <>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/40" onClick={onClose} />
+          <div className="bg-white rounded shadow-lg max-w-lg w-full p-6 z-10">
+            <div className="text-lg font-bold mb-4">{title}</div>
+            <div className="grid gap-4">
+              {fields.map((field) => {
+                const value = field.value ?? formData[field.name] ?? ''
+                if (field.type === 'number') {
+                  return (
+                    <input
+                      key={field.name}
+                      name={field.name}
+                      type="number"
+                      className="w-full border rounded px-3 py-2"
+                      aria-readonly={field.readOnly}
+                      required={field.required}
+                      value={value}
+                      onChange={(e) => onChange(field.name, e.target.value)}
+                    />
+                  )
                 }
-                label={field.label}
-                />
-              )
-            }
 
-            return (
-              <TextField
-                key={field.name}
-                name={field.name}
-                label={field.label}
-                type={field.type}
-                fullWidth
-                required={field.required}
-                multiline={field.multiline}
-                rows={field.rows || 1}
-                placeholder={field.placeholder}
-                value={field.value || formData[field.name] || ''}
-                onChange={(e) => onChange(field.name, e.target.value)}
-                aria-readonly={field.readOnly}
-                focused={!field.readOnly}
-              />
-            )
-          })}
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={isLoading}>
-          إلغاء
-        </Button>
-        <Button onClick={onSave} variant="contained" disabled={isLoading}>
-          {isLoading ? 'جاري...' : 'حفظ'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+                if (field.type === 'select') {
+                  return (
+                    <select
+                      key={field.name}
+                      name={field.name}
+                      className="w-full border rounded px-3 py-2"
+                      value={value}
+                      onChange={(e) => onChange(field.name, e.target.value)}
+                      aria-readonly={field.readOnly}
+                      required={field.required}
+                    >
+                      <option value="">{field.label}</option>
+                      {field.options?.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  )
+                }
+
+                if (field.type === 'multiselect') {
+                  return (
+                    <select
+                      key={field.name}
+                      multiple
+                      name={field.name}
+                      className="w-full border rounded px-3 py-2"
+                      value={formData[field.name] || []}
+                      onChange={(e) => {
+                        const opts = Array.from((e.target as HTMLSelectElement).selectedOptions).map(o => o.value)
+                        onChange(field.name, opts)
+                      }}
+                      aria-readonly={field.readOnly}
+                      required={field.required}
+                    >
+                      {field.options?.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  )
+                }
+
+                if (field.type === 'date') {
+                  return (
+                    <input
+                      key={field.name}
+                      name={field.name}
+                      type="date"
+                      className="w-full border rounded px-3 py-2"
+                      aria-readonly={field.readOnly}
+                      required={field.required}
+                      value={value}
+                      onChange={(e) => onChange(field.name, e.target.value)}
+                    />
+                  )
+                }
+
+                if (field.type === 'checkbox') {
+                  return (
+                    <label key={field.name} className="inline-flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        name={field.name}
+                        checked={!!value}
+                        onChange={(e) => onChange(field.name, e.target.checked)}
+                        required={field.required}
+                        aria-readonly={field.readOnly}
+                      />
+                      <span>{field.label}</span>
+                    </label>
+                  )
+                }
+
+                return (
+                  field.multiline ? (
+                    <textarea
+                      key={field.name}
+                      name={field.name}
+                      className="w-full border rounded px-3 py-2"
+                      rows={field.rows || 3}
+                      placeholder={field.placeholder}
+                      value={value}
+                      onChange={(e) => onChange(field.name, e.target.value)}
+                      readOnly={field.readOnly}
+                    />
+                  ) : (
+                    <input
+                      key={field.name}
+                      name={field.name}
+                      type={field.type}
+                      className="w-full border rounded px-3 py-2"
+                      required={field.required}
+                      placeholder={field.placeholder}
+                      value={value}
+                      onChange={(e) => onChange(field.name, e.target.value)}
+                      readOnly={field.readOnly}
+                    />
+                  )
+                )
+              })}
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button onClick={onClose} disabled={isLoading} className="px-4 py-2 border rounded">
+                إلغاء
+              </button>
+              <button onClick={onSave} disabled={isLoading} className="px-4 py-2 bg-blue-600 text-white rounded">
+                {isLoading ? 'جاري...' : 'حفظ'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

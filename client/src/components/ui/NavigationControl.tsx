@@ -22,11 +22,11 @@ const NavigationControl:React.FC<Props> = ({pageCount, maxPages, modifyPaginatio
 
     return (
         <div dir="ltr" className='flex gap-1 text-xl justify-center mt-4'>
-            <div onClick={()=>changePage('start')} className={`w-8 flex justify-center items-center border border-${pageCount>1? 'black cursor-pointer': 'gray-500 text-gray-500 cursor-not-allowed'}`}><MdKeyboardDoubleArrowLeft/></div>
-            <div onClick={()=>changePage('previous')} className={`w-8 flex justify-center items-center border border-${pageCount>1? 'black cursor-pointer': 'gray-500 text-gray-500 cursor-not-allowed'}`}><MdKeyboardArrowLeft/></div>
-            <div className='w-8 flex justify-center items-center border-b-2 border-black text-sm py-1'>{pageCount}</div>
-            <div onClick={()=>changePage('next')} className={`w-8 flex justify-center items-center border border-${pageCount<maxPages? 'black cursor-pointer': 'gray-500 text-gray-500 cursor-not-allowed'}`}><MdKeyboardArrowRight/></div>
-            <div onClick={()=>changePage('end')} className={`w-8 flex justify-center items-center border border-${pageCount<maxPages? 'black  cursor-pointer': 'gray-500 text-gray-500 cursor-not-allowed'}`}><MdKeyboardDoubleArrowRight/></div>
+            <div onClick={()=>changePage('start')} className={`w-8 flex justify-center items-center border border-[#989898] ${pageCount>1? 'cursor-pointer bg-white': 'text-gray-500 cursor-not-allowed'}`}><MdKeyboardDoubleArrowLeft/></div>
+            <div onClick={()=>changePage('previous')} className={`w-8 flex justify-center items-center border border-[#989898] ${pageCount>1? 'cursor-pointer bg-white': 'text-gray-500 cursor-not-allowed'}`}><MdKeyboardArrowLeft/></div>
+            <div className='w-8 flex justify-center items-center border-b-2 text-sm py-1'>{pageCount}</div>
+            <div onClick={()=>changePage('next')} className={`w-8 flex justify-center items-center border border-[#989898] ${pageCount<maxPages? 'cursor-pointer bg-white': 'text-gray-500 cursor-not-allowed'}`}><MdKeyboardArrowRight/></div>
+            <div onClick={()=>changePage('end')} className={`w-8 flex justify-center items-center border border-[#989898] ${pageCount<maxPages? ' cursor-pointer bg-white': 'text-gray-500 cursor-not-allowed'}`}><MdKeyboardDoubleArrowRight/></div>
         </div> 
     )
 }
