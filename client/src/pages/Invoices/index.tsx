@@ -1,4 +1,3 @@
-import React from 'react'
 import { PageHeader, DataTable, StatsCard } from '../../components/common'
 import type { Invoice, Supplier, Transaction } from '../../types'
 import { PAGE_HEADERS, VALIDATION_MESSAGES } from '../../utils/constants'

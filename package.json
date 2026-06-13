@@ -12,7 +12,7 @@
     "install:all": "npm install",
     "install:client": "npm install --workspace=client",
     "install:server": "npm install --workspace=server",
-    "build:all": "npm run build --workspace=server & npm run build --workspace=client",
+    "build:all": "npm run build --workspace=server && npm run build --workspace=client",
     "build:client": "npm run build --workspace=client",
     "build:server": "npm run build --workspace=server",
     "start:all": "npm run start --workspace=server & npm run start --workspace=client",

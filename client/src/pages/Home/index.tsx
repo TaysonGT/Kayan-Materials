@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router'
-import React from 'react'
 import { useSuppliers } from '../../hooks/useSuppliers'
 import { useMaterials } from '../../hooks/useMaterials'
 import { useTransactions } from '../../hooks/useTransactions'

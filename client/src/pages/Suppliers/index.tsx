@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import React from 'react'
 import { FiEye } from 'react-icons/fi'
 import { useSuppliers } from '../../hooks/useSuppliers'
 import { PageHeader, FormDialog, DataTable } from '../../components/common'

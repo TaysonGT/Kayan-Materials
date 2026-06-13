@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import React from 'react'
 import { FiArrowRight } from 'react-icons/fi';
 import { useNavigate, useParams } from 'react-router';
 import { DataTable } from '../../components/common';

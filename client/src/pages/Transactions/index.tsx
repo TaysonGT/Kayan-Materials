@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTransactions } from '../../hooks/useTransactions'
 import { PageHeader, DataTable, StatsCard } from '../../components/common'
 import type { Invoice, Material, Transaction } from '../../types'
