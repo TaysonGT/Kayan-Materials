@@ -2,9 +2,7 @@
 # Supports both Client (React) and Server (Express) in single repo
 
 [build]
-  # Install dependencies for both client and server
-  command = "npm run install:all && npm run build:all"
-  # Publish the client dist folder
+  command = "npm run install:client && npm run build:client"
   publish = "client/dist"
 
 [build.environment]
@@ -33,6 +31,6 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "http://noel.hidencloud.com:24704/api/:splat"
+  to = "https://kayan-materials.vercel.app/api/:splat"
   status = 200
   force = true
